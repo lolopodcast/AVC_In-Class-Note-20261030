@@ -1,0 +1,1624 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AVC | AI Vibe Coding Workshop In-Class Note</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script crossorigin src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.7/babel.min.js"></script>
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: { extend: { fontFamily: { sans: ['Inter','Noto Sans TC','PingFang TC','Microsoft JhengHei','sans-serif'], serif: ['Merriweather','Noto Serif TC','serif'] } } }
+};
+</script>
+<style>
+@keyframes fadeInUp { from{opacity:0;transform:translateY(15px)} to{opacity:1;transform:translateY(0)} }
+.animate-fade-in { animation: fadeInUp 0.5s ease-out forwards; }
+.perspective { perspective: 1000px; }
+.transform-style-3d { transform-style: preserve-3d; }
+.backface-hidden { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.rotate-y-180 { transform: rotateY(180deg); }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+.dark ::-webkit-scrollbar-thumb { background: #475569; }
+header, footer, button, [role="button"], .ui-decoration { -webkit-user-select: none; user-select: none; }
+input, textarea, select { -webkit-user-select: text; user-select: text; }
+#cr-toast { position: fixed; left: 50%; bottom: 56px; transform: translateX(-50%); background: #004030; color: #D8C3A5; padding: 10px 18px; border-radius: 10px; font: 600 13px Inter, sans-serif; opacity: 0; pointer-events: none; transition: opacity .3s; z-index: 200; box-shadow: 0 6px 20px rgba(0,0,0,.25); }
+</style>
+</head>
+<body class="bg-[#f4f4f4] dark:bg-[#121212] text-slate-800 dark:text-slate-200 font-sans selection:bg-[#004030] selection:text-white dark:selection:bg-[#D8C3A5] dark:selection:text-[#004030]">
+<div id="root"></div>
+<div id="cr-toast"></div>
+<script>
+/* ===== Front-end protection (runs before React) ===== */
+window.__BLOCKED = false;
+var COPYRIGHT_MSG = 'Intellectual Property of Prof. Shihmin Lo';
+function showCopyrightToast() {
+  var el = document.getElementById('cr-toast');
+  if (!el) return;
+  el.textContent = COPYRIGHT_MSG;
+  el.style.opacity = '1';
+  clearTimeout(window.__crT);
+  window.__crT = setTimeout(function(){ el.style.opacity = '0'; }, 2000);
+}
+(function(){
+  var ALLOWED = ['lolopodcast.github.io','localhost','127.0.0.1'];
+  var REDIRECT = 'https://www.ibs.ncnu.edu.tw/index.php/faculty/tenured-professor/299-smlo';
+  var h = location.hostname;
+  if (!ALLOWED.some(function(d){ return h === d || h.endsWith('.' + d); })) {
+    window.__BLOCKED = true;
+    document.body.innerHTML = '<div style="text-align:center;padding:60px;font-family:sans-serif"><h1>Access Denied</h1><p>This resource is not authorised on this domain.</p></div>';
+    setTimeout(function(){ location.href = REDIRECT; }, 3000);
+    return;
+  }
+  if (window.self !== window.top) {
+    try { window.top.location.href = window.self.location.href; }
+    catch(e) { window.__BLOCKED = true; document.body.innerHTML = '<div style="text-align:center;padding:60px"><h1>Frame Blocked</h1><p>This content cannot be embedded.</p></div>'; }
+  }
+})();
+document.addEventListener('contextmenu', function(e){
+  var sel = (window.getSelection() || '').toString().trim();
+  if (sel.length > 0) return true;
+  e.preventDefault(); showCopyrightToast();
+});
+document.addEventListener('keydown', function(e){
+  var k = (e.key || '').toLowerCase();
+  if (e.key === 'F12') { e.preventDefault(); showCopyrightToast(); return; }
+  if (e.ctrlKey && k === 'u') { e.preventDefault(); showCopyrightToast(); return; }
+  if (e.ctrlKey && e.shiftKey && ['i','j','c'].indexOf(k) > -1) { e.preventDefault(); showCopyrightToast(); return; }
+});
+document.addEventListener('dragstart', function(e){
+  if (e.target.tagName === 'IMG' || (e.target.closest && e.target.closest('svg'))) e.preventDefault();
+});
+var sanitizeStudentId = function(v){ return v.replace(/[^0-9]/g, '').slice(0, 12); };
+var sanitizeName = function(v){ return v.replace(/[<>"'&\\]/g, '').slice(0, 50); };
+var safeHTML = function(raw){ return window.DOMPurify ? DOMPurify.sanitize(raw) : ''; };
+</script>
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useRef } = React;
+
+/* ===== Answer obfuscation ===== */
+const _SALT = 'AVC2026';
+const _e = (s, n) => { const p = s + ':' + n; let r = ''; for (let i = 0; i < p.length; i++) r += String.fromCharCode(p.charCodeAt(i) ^ ((i + 7) * 3 & 0xFF)); return btoa(r); };
+const _d = (token) => { const decoded = atob(token); let r = ''; for (let i = 0; i < decoded.length; i++) r += String.fromCharCode(decoded.charCodeAt(i) ^ ((i + 7) * 3 & 0xFF)); return parseInt(r.split(':')[1], 10); };
+const _A0 = _e(_SALT, 0), _A1 = _e(_SALT, 1), _A2 = _e(_SALT, 2), _A3 = _e(_SALT, 3);
+
+/* ===== Module constants ===== */
+const NUM_LEARN = 5;
+const TOTAL = 1 + NUM_LEARN + 3;
+const IDX_LAB = NUM_LEARN + 1;
+const IDX_RES = NUM_LEARN + 2;
+const IDX_ANA = NUM_LEARN + 3;
+const APP_VER = '2026.10.30';
+
+/* ===== Icons (inline SVG) ===== */
+const mkIcon = (children) => ({ size = 20, className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">{children}</svg>
+);
+const IconBookOpen = mkIcon(<><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></>);
+const IconAlertTriangle = mkIcon(<><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></>);
+const IconCheckCircle = mkIcon(<><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></>);
+const IconGlobe = mkIcon(<><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></>);
+const IconChevronRight = mkIcon(<polyline points="9 18 15 12 9 6"/>);
+const IconChevronUp = mkIcon(<polyline points="18 15 12 9 6 15"/>);
+const IconMenu = mkIcon(<><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></>);
+const IconX = mkIcon(<><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></>);
+const IconMoon = mkIcon(<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>);
+const IconSun = mkIcon(<><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></>);
+const IconPlay = mkIcon(<polygon points="5 3 19 12 5 21 5 3"/>);
+const IconPause = mkIcon(<><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></>);
+const IconSquare = mkIcon(<rect x="4" y="4" width="16" height="16" rx="2"/>);
+const IconArrowRight = mkIcon(<><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></>);
+const IconActivity = mkIcon(<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>);
+const IconCpu = mkIcon(<><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></>);
+const IconTrendingUp = mkIcon(<><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></>);
+const IconLayers = mkIcon(<><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></>);
+const IconFlag = mkIcon(<><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></>);
+const IconZap = mkIcon(<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>);
+const IconFlask = mkIcon(<><path d="M9 2h6"/><path d="M10 2v6L4 20a1 1 0 0 0 .9 1.5h14.2A1 1 0 0 0 20 20L14 8V2"/></>);
+const IconZapLab = mkIcon(<><path d="M9 2h6"/><path d="M10 2v6L4 20a1 1 0 0 0 .9 1.5h14.2A1 1 0 0 0 20 20L14 8V2"/><polyline points="12.5 11 10.5 15 13.5 15 11.5 19"/></>);
+const IconHome = mkIcon(<><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></>);
+
+/* ===== Bilingual dictionary ===== */
+const dict = {
+  zh: {
+    brand: "AVC",
+    title: "AI Vibe Coding 工作坊課堂筆記",
+    subtitle: "2026-10-30｜實踐大學 AIEA 學院｜駱世民（暨大國企）",
+    nav_modules: "單元目錄", nav_prev: "上一單元", nav_next: "下一單元", nav_home: "首頁",
+    key_terms: "關鍵專有名詞", flip_prompt: "點擊翻轉",
+    flip_status: "已讀 {read} / 已顯示 {shown} / 總計 {total}",
+    flip_next: "下一組", flip_retry: "重新開始",
+    audio_read: "語音導覽",
+    quiz_title: "模組知識檢定",
+    quiz_status: "答對 {correct} / 已答 {answered} / 總計 {total}",
+    quiz_next: "下一組", quiz_retry: "重新測驗",
+    submit: "提交答案",
+    score: "得分", correct: "正確", incorrect: "錯誤", explanation: "解析",
+    overview_label: "Overview 概述",
+    highlights_label: "Highlights 重點",
+    deep_dive_label: "Deep Dive 深入解析",
+    wrapup_label: "Wrap-up 總結",
+    figure_label: "圖解",
+
+    analytics_title: "學習歷程分析",
+    analytics_desc: "系統會在本機瀏覽器記錄你在各模組的停留時間、互動點擊、學習卡與測驗表現。填寫基本資料後即可匯出 CSV 歷程記錄。",
+    analytics_form_title: "基本資料",
+    analytics_group: "組別", analytics_group_select: "請選擇", analytics_dept: "系級",
+    analytics_dept_ph: "例：IBS3",
+    analytics_id: "學號", analytics_id_ph: "例：113212599",
+    analytics_name_en: "英文姓名", analytics_name_en_ph: "例：Shihmin Lo",
+    analytics_name_zh: "中文姓名", analytics_name_zh_ph: "例：王阿吉",
+    analytics_export_csv: "匯出 CSV 歷程記錄",
+    analytics_fill_required: "請填寫完整資訊以解鎖匯出",
+    analytics_refresh_prompt: "網頁已更新，是否刷新紀錄儲存？",
+    group_options: ["G1","G2","G3","G4","G5","G6","G7","G8","G9","G10","G11","G12","Others"],
+    analytics_total_time: "總學習時間", analytics_total_clicks: "總互動點擊",
+    analytics_overall_acc: "總體測驗答對率",
+    analytics_card_usage: "學習卡使用率",
+    analytics_module: "模組", analytics_time: "停留時間",
+    analytics_clicks: "點擊次數", analytics_acc: "答對率",
+    analytics_correct_ans_total: "答對 / 已填答 / 總題數",
+    analytics_cards_read_total: "已讀 / 總卡數",
+    analytics_no_data: "尚未測驗", analytics_sec: "秒", analytics_times: "次",
+    analytics_progress_title: "整體學習進度",
+    analytics_progress_visited: "已瀏覽", analytics_progress_not_visited: "未瀏覽",
+    analytics_progress_quiz_done: "已測驗",
+    analytics_wp_title: "弱點分析與複習建議",
+    analytics_wp_incorrect: "答錯題目：",
+    analytics_wp_goto: "→ 前往複習此模組",
+    analytics_wp_allpass: "所有已測驗模組答對率均達 75% 以上，表現優異！",
+    analytics_wp_saved: "💾 學習歷程已自動儲存於本機瀏覽器",
+    analytics_wp_clear: "🗑 清除歷程",
+    analytics_wp_clear_confirm: "確定要清除所有學習歷程資料嗎？此操作無法復原。",
+    analytics_wp_tts_intro: "以下是您的弱點分析。",
+    analytics_wp_tts_module: "模組：{name}，答對率 {acc}%，建議複習。",
+    analytics_wp_tts_allpass: "恭喜！所有已測驗模組答對率均達 75% 以上。",
+
+    /* ---------- M0 ---------- */
+    m0_nav: "0. 執行概要",
+    m0_title: "執行概要：AI 時代的課堂駕訓班",
+    m0_intro: "本網頁整理自 2026 年 10 月 30 日於實踐大學 AIEA 學院舉辦的「AI Vibe Coding 工作坊」課堂板書。全場以「駕訓班」為核心比喻：從馬車、汽車、電動車到無人自駕車，每一次交通工具換代，都需要新的道路基礎建設與交通規範，AI 時代的教學也是如此。課程依循五個步驟展開：先用比喻說明為什麼要談 AI，再盤點學生在投入、過程、產出三方面的程度分布，接著提出從 EMI 轉向 EML、再擴展到 T²MI 的語言學習目標，然後建置六項課堂環境工具，最後說明 AI 能力從提示工程一路進階到代理式 AI 的五個層次。教師的角色就像駕訓班教練，不只教學生開哪一台車，更要教會他們安全上路。",
+    m0_why: "為什麼這套架構重要？",
+    m0_why_desc: "AI 工具日新月異，但真正決定學習成效的，是教師能否建好環境、設定清楚的目標，並帶領多數學生穩定進步。這套從比喻、現況、目標、環境到能力的流程，讓教師導入 AI 時有清楚的步驟可以依循。",
+    m0_flow_title: "全場邏輯總覽",
+    m0_modules: [
+      { num: "01", title: "核心比喻：駕訓班", desc: "交通工具換代需要規範與基礎建設，教師如駕訓班教練。" },
+      { num: "02", title: "學習者現況", desc: "學生程度呈 20/60/20 分布，以投入、過程、產出衡量。" },
+      { num: "03", title: "目標語言架構", desc: "從 EMI 轉向 EML，再擴展到學科、自然、AI 三語的 T²MI。" },
+      { num: "04", title: "課堂環境建置", desc: "板書「1. 環境」列出的六項課堂工具。" },
+      { num: "05", title: "AI 能力進階", desc: "從提示工程到代理式 AI 的五個層次。" }
+    ],
+    m0_stats: [
+      { val: "5", label: "學習模組" },
+      { val: "6", label: "課堂環境工具" },
+      { val: "T²", label: "三語 × 自然語言三類" },
+      { val: "80%", label: "提升目標學生比例" }
+    ],
+    m0_start: "開始學習 →",
+
+    /* ---------- M1 ---------- */
+    m1_nav: "1. 核心比喻：駕訓班",
+    m1_title: "核心比喻：駕訓班與交通演進",
+    m1_overview: "交通工具從馬車演進到無人自駕車，每一次換代都需要新的道路與規範。本模組用這個比喻說明：在 AI 時代的教學中，教師就像駕訓班教練，學生則是這個世代的主體。",
+    m1_highlights: ["馬車 → 汽車 → 電動車 → 自駕車", "交通規範", "Infrastructure 基礎建設", "AI 時代", "學生是主體", "教師如駕訓班"],
+    m1_p1: "板書左側描繪了一條交通演進路徑：馬車行走於馬路與土地上，依靠路邊（curbside）的空間；汽車出現後，需要鋪設柏油路；接著是電動車，最後是可分為 Level 1 到 Level 5 的無人自駕車。每一代交通工具都比上一代更快、更自動，但也更依賴周邊條件的配合。",
+    m1_p2: "每一次換代，都需要兩項支撐條件：一是交通規範，也就是大家共同遵守的遊戲規則；二是 Infrastructure，也就是道路、號誌、充電站等基礎建設。少了這兩項，再好的車也開不上路。",
+    m1_p3: "這個比喻直接對應到 AI 時代的教學。AI 工具就像新一代的車，但課堂若缺乏合適的環境與使用規範，學生仍然無法有效學習。這個世代的主體是學生，教師的角色則像駕訓班教練：不只告訴學生該開哪一台車，更要教會他們看懂道路規範、掌握駕駛技巧，最後能夠安全、獨立地上路。",
+    m1_terms: [
+      { front: "駕訓班比喻", back: "教師如同駕訓班教練，不只教學生使用 AI 工具，更要教會規範與安全使用。" },
+      { front: "交通規範", back: "每次換代都需要的共同遊戲規則，對應 AI 使用的倫理與規範。" },
+      { front: "Infrastructure", back: "基礎建設，如道路與號誌，對應課堂的教學環境與工具。" },
+      { front: "自駕車 Level 1~5", back: "自動化程度由低到高的分級，代表交通工具演進的最新階段。" }
+    ],
+    m1_wrapup: "本模組以交通演進比喻 AI 時代的教學轉變。從馬車到自駕車，每一代交通工具都需要交通規範與基礎建設兩項支撐條件。對應到教學，AI 工具本身並不足以帶來學習成效，教師必須先建好課堂環境、訂定使用規範。學生是這個世代的主體，教師則扮演駕訓班教練的角色，帶領學生安全、獨立地駕馭 AI。",
+    m1_q: [
+      { q: "板書中交通工具演進的正確順序為何？", opts: ["汽車 → 馬車 → 電動車 → 自駕車", "馬車 → 汽車 → 電動車 → 無人自駕車", "馬車 → 電動車 → 汽車 → 自駕車", "電動車 → 汽車 → 馬車 → 自駕車"], ans: _A1, exp: "板書路徑為馬車、汽車、電動車，最後是 Level 1~5 的無人自駕車。" },
+      { q: "每次交通工具換代都需要哪兩項支撐條件？", opts: ["交通規範與基礎建設", "更快的引擎與更多乘客", "駕駛執照與保險", "油價與車價"], ans: _A0, exp: "板書列出交通規範與 Infrastructure 兩項支撐條件。" },
+      { q: "在這個比喻中，教師扮演什麼角色？", opts: ["汽車製造商", "交通警察", "駕訓班教練", "乘客"], ans: _A2, exp: "教師如同駕訓班教練，教學生規範與駕駛技巧。" },
+      { q: "板書指出 AI 時代這個世代的主體是誰？", opts: ["AI 工具", "學生", "教育行政單位", "科技公司"], ans: _A1, exp: "板書在「AI 時代」旁標註世代的主體是學生。" }
+    ],
+
+    /* ---------- M2 ---------- */
+    m2_nav: "2. 學習者現況：程度分布",
+    m2_title: "學習者現況：學生程度分布",
+    m2_overview: "學生的程度原本就呈 20%、60%、20% 的分布。本模組說明衡量學生程度的三個指標，以及教學應該把力氣放在哪裡。",
+    m2_highlights: ["20% / 60% / 20%", "Input 投入（準備）", "Process 過程（參與）", "Output 產出（表現）", "提升前段 + 中段", "後段姑且沒緣分"],
+    m2_p1: "板書中的鐘形曲線，描繪的是學生程度的原始分布：前段約 20%、中段約 60%、後段約 20%。這個分布並不是教學的結果，而是學生進入課堂時本來就存在的狀態。",
+    m2_p2: "衡量學生程度有三個指標：第一是 Input 投入，指學生課前的準備程度；第二是 Process 過程，指學生在課堂中的參與程度；第三是 Output 產出，指學生最後的表現程度。三者構成一條完整的學習流程。",
+    m2_p3: "教學的目標，是提升前段 20% 與中段 60% 學生在投入、過程、產出三方面的程度，也就是把大約八成的學生往上推。至於後段 20%，板書的說法是「姑且沒緣分」：教師的時間與心力有限，與其平均分散，不如集中在最有機會進步的多數學生身上，讓整體學習成效真正提升。",
+    m2_terms: [
+      { front: "Input 投入", back: "學生課前的準備程度。" },
+      { front: "Process 過程", back: "學生在課堂中的參與程度。" },
+      { front: "Output 產出", back: "學生最後的表現程度。" },
+      { front: "20 / 60 / 20", back: "學生程度的原始分布；目標是提升前段 20% 與中段 60%。" }
+    ],
+    m2_wrapup: "本模組說明學生程度原本呈 20%、60%、20% 分布，並以投入（準備）、過程（參與）、產出（表現）三個指標衡量。教學目標是提升前段與中段約八成學生的程度，後段 20% 則姑且沒緣分。這個判斷讓教師把有限的心力集中在最有機會進步的多數學生身上，也為後續的環境建置與 AI 工具選擇提供方向。",
+    m2_q: [
+      { q: "板書中學生程度的原始分布為何？", opts: ["10% / 80% / 10%", "20% / 60% / 20%", "33% / 33% / 33%", "30% / 40% / 30%"], ans: _A1, exp: "板書的鐘形曲線標示 20%、60%、20%。" },
+      { q: "「Process 過程」指的是學生的哪一種程度？", opts: ["準備程度", "參與程度", "表現程度", "出席程度"], ans: _A1, exp: "Process 過程對應學生在課堂中的參與程度。" },
+      { q: "教學目標要提升哪些學生？", opts: ["只有前段 20%", "只有後段 20%", "前段 20% 與中段 60%", "所有學生平均分配"], ans: _A2, exp: "目標是提升前段 20% 與中段 60%，後段 20% 姑且沒緣分。" },
+      { q: "「Output 產出」對應的是？", opts: ["表現程度", "準備程度", "參與程度", "注意力程度"], ans: _A0, exp: "Output 產出指學生最後的表現程度。" }
+    ],
+
+    /* ---------- M3 ---------- */
+    m3_nav: "3. 目標語言：EML → T²MI",
+    m3_title: "目標語言架構：EMI → EML → T²MI",
+    m3_overview: "與其推動 EMI，不如推動 EML，讓學生能以英文作為學習的主要媒介；再進一步擴展到 T²MI，讓學科語言、自然語言與 AI 語言三者並用。",
+    m3_highlights: ["EMI ✗ Instruction", "EML ○ Learning", "T²MI 三語的平方", "Subject language", "Natural language", "AI language", "Input：聽・讀", "Output：說・寫"],
+    m3_p1: "EMI 是 English as a Medium of Instruction，焦點在教師如何用英文教。板書在 Instruction 旁打了叉，在 Learning 旁畫了圈：與其說要推動 EMI，不如說要推動 EML，也就是 English as a Medium of Learning，讓學生能夠以英文作為學習的主要媒介。重點從「教師怎麼教」轉向「學生怎麼學」。",
+    m3_p2: "在 EML 之上，板書更提出 T²MI。第一層是三語：學科語言（Subject language）、人類自然語言（板書寫作 English language）、AI 語言（AI language）。第二層是把自然語言再分成三類：華語、英語或任一外語，以及母語。三語再乘上自然語言三類，就是 T² 的意思。",
+    m3_p3: "母語指的是 Mother／First Language，涵蓋國家語言，包括原住民語、台語、客語與新住民語。語言技能也有兩種方向：聽與讀屬於 input-oriented，說與寫屬於 output-oriented。這兩種方向正好對應學生學習流程中的投入與產出。",
+    m3_terms: [
+      { front: "EML", back: "English as a Medium of Learning：讓學生以英文作為學習的主要媒介。" },
+      { front: "T²MI", back: "三語的平方：學科、自然、AI 三語，自然語言又分華語、外語、母語三類。" },
+      { front: "Subject language", back: "學科語言，即該學科的專業術語與概念。" },
+      { front: "AI language", back: "與 AI 溝通的語言，例如提示、脈絡與 Skill 指令。" },
+      { front: "母語", back: "Mother／First Language，包括原住民語、台語、客語與新住民語。" },
+      { front: "Input / Output-oriented", back: "聽、讀屬於輸入導向；說、寫屬於輸出導向。" }
+    ],
+    m3_wrapup: "本模組說明語言目標的轉向：從以教師為中心的 EMI，轉向以學生為中心的 EML，讓學生以英文作為學習的主要媒介。進一步的 T²MI 包含兩層：第一層是學科語言、自然語言與 AI 語言三語；第二層是自然語言再分為華語、外語與母語三類。語言技能則分為聽、讀的輸入導向與說、寫的輸出導向。",
+    m3_q: [
+      { q: "板書認為應該推動什麼？", opts: ["EMI，以英文教學", "EML，以英文為學習的主要媒介", "全中文教學", "只學 AI 語言"], ans: _A1, exp: "Instruction 打叉、Learning 畫圈，重點是學生以英文為學習媒介。" },
+      { q: "T²MI 第一層的三語是哪三種？", opts: ["華語、英語、母語", "學科語言、自然語言、AI 語言", "聽、說、讀", "台語、客語、原住民語"], ans: _A1, exp: "第一層三語為 Subject、Natural、AI language。" },
+      { q: "在 T²MI 中，自然語言又分為哪三類？", opts: ["華語、英語或外語、母語", "學科、AI、程式", "聽讀、說寫、翻譯", "英式、美式、澳式英語"], ans: _A0, exp: "第二層把自然語言分為華語、英語或任一外語、母語。" },
+      { q: "哪一組屬於 output-oriented 技能？", opts: ["聽與讀", "說與寫", "聽與說", "讀與寫"], ans: _A1, exp: "說與寫是輸出導向，聽與讀是輸入導向。" }
+    ],
+
+    /* ---------- M4 ---------- */
+    m4_nav: "4. 課堂環境：六項工具",
+    m4_title: "流程一：課堂環境建置",
+    m4_overview: "板書「1. 環境」列出六項課堂工具，涵蓋教師呈現、學生筆記、即時互動、資源入口，以及兩種 AI 輔助學習方式。",
+    m4_highlights: ["Desktop camera", "In-class note", "In-class Q&A", "AI 教學資源總入口", "ChatGPT Voice Mode", "Chrome 內建 Gemini", "Attention-based"],
+    m4_p1: "前三項處理課堂的基本互動。第一項是教師用的 desktop camera，可呈現傳統板書或電子白板，與事先準備好的數位、多媒體教材形成對照。第二項是學生的 in-class note（或錄音），設計原則是 attention-based：注意力是稀缺資源，筆記要幫助學生把注意力放在重點上。第三項是 in-class Q&A，例如 Slido、Mentimeter，讓師生即時互動。",
+    m4_p2: "第四項是 AI 教學資源總入口，板書以 Σ 魚池形容：把 AI、Education、Motivation、EMI 等各類資源匯集在同一個入口，讓學生能自己去釣需要的資源。",
+    m4_p3: "後兩項是 AI 輔助學習。第五項是 ChatGPT 的 Voice Mode：學生可以自己和 AI 對話、練習唸讀，也可以把小組討論錄音交給 AI 去聽、呼喚重點並總整理。第六項是 Chrome 內建的 Gemini，能讀取瀏覽器中的網頁與影片內容，而且不限語言，例如把一段中文解說轉成附有時間戳記的英文逐字稿。",
+    m4_terms: [
+      { front: "Desktop camera", back: "教師用來呈現板書或電子白板，對照事先備好的數位教材。" },
+      { front: "Attention-based", back: "以注意力為核心的設計，因為注意力是稀缺資源。" },
+      { front: "In-class Q&A", back: "課堂即時問答工具，例如 Slido、Mentimeter。" },
+      { front: "Σ 魚池", back: "AI 教學資源總入口，匯集 AI、Education、Motivation、EMI 等資源。" },
+      { front: "Voice Mode", back: "ChatGPT 語音模式：學生自己對話、唸讀，或整理小組討論錄音。" },
+      { front: "Chrome 內建 Gemini", back: "讀取網頁與影片內容，不限語言，例如產出附時間戳記的英文逐字稿。" }
+    ],
+    m4_wrapup: "本模組整理了六項課堂環境工具。前三項（desktop camera、in-class note、in-class Q&A）建立課堂的呈現、筆記與互動基礎，並以注意力稀缺為設計原則；第四項 AI 教學資源總入口像一座魚池，匯集各類資源；後兩項 ChatGPT Voice Mode 與 Chrome 內建 Gemini，則讓學生能用 AI 跨語言聽、說、讀、寫，是實踐 EML 與 T²MI 的具體途徑。",
+    m4_q: [
+      { q: "In-class note 的設計原則是什麼？", opts: ["attention-based，因為注意力稀缺", "越詳細越好", "全部由教師代寫", "只能用紙筆"], ans: _A0, exp: "板書標示 attention-based，並註明注意力（scarcity）稀缺。" },
+      { q: "板書以什麼形容 AI 教學資源總入口？", opts: ["高速公路", "Σ 魚池", "圖書館", "駕訓班"], ans: _A1, exp: "AI 教學資源總入口被形容為 Σ 魚池。" },
+      { q: "下列哪一項是 in-class Q&A 工具的例子？", opts: ["Slido、Mentimeter", "Excel、Word", "Photoshop", "電子郵件"], ans: _A0, exp: "板書舉例 Slido 與 Mentimeter。" },
+      { q: "Chrome 內建 Gemini 的應用例子是？", opts: ["自動批改考卷", "把中文解說轉成附時間戳記的英文逐字稿", "管理學生出缺勤", "製作簡報範本"], ans: _A1, exp: "板書例子：中文解說 → English transcript with time stamps。" }
+    ],
+
+    /* ---------- M5 ---------- */
+    m5_nav: "5. AI 能力：L1 → L5",
+    m5_title: "流程二：AI 能力進階",
+    m5_overview: "AI 能力可分為五個層次：提示工程、脈絡工程、駕馭工程，再到半自動化的工作流，以及全自動化的代理式 AI。",
+    m5_highlights: ["L1 Prompt", "L2 Context", "L3 Harness", "L4 Skills／Workflow", "L5 Agentic AI", "ReAct", "PDCA"],
+    m5_p1: "前三個層次是使用 AI 的基本功。L1 Prompt engineering（提示工程）學習如何下指令；L2 Context engineering（脈絡工程）學習提供 AI 適當的背景資訊；L3 Harness engineering（駕馭工程）則要兼顧資安、倫理、風險，以及效率與可靠度，讓 AI 安全地為我所用。",
+    m5_p2: "L4 是半自動化：從 Project（例如 GPTs、Gems）到 Skills，再到例行化的工作流（routinized workflow）。板書舉的例子是 KB.md：先整理一份 Markdown 知識庫，再據以產出 SVG、SPA、PWA、影片與 Podcast。",
+    m5_p3: "L5 是全自動化：透過 loop（heartbeat）定時運作，形成代理式 AI（Agentic AI）。它的運作遵循 ReAct 循環：Plan、Reasoning、Action、Observation，觀察結果後再回到規劃；也可以用 PDCA 循環來理解：Plan、Do、Check、Adjust，持續修正與改善。",
+    m5_terms: [
+      { front: "Prompt engineering", back: "提示工程：學習如何對 AI 下清楚的指令。" },
+      { front: "Context engineering", back: "脈絡工程：提供 AI 適當的背景資訊與資料。" },
+      { front: "Harness engineering", back: "駕馭工程：兼顧資安、倫理、風險與效率可靠度。" },
+      { front: "Skills", back: "可重複使用的任務指令包，屬於半自動化層次。" },
+      { front: "Agentic AI", back: "代理式 AI：透過 loop 自行規劃、推理、行動與觀察。" },
+      { front: "ReAct", back: "Plan → Reasoning → Action → Observation 的循環。" }
+    ],
+    m5_wrapup: "本模組說明 AI 能力的五個層次。L1 到 L3 分別是提示工程、脈絡工程與駕馭工程，其中駕馭工程需兼顧資安、倫理、風險與效率可靠度。L4 半自動化以 Project、Skills 與例行化工作流為核心，例如由 KB.md 產出 SVG、SPA、PWA 與 Podcast。L5 全自動化透過 loop 形成代理式 AI，並以 ReAct 與 PDCA 循環持續運作。",
+    m5_q: [
+      { q: "Harness engineering 需要兼顧哪些面向？", opts: ["資安、倫理、風險、效率與可靠度", "字型、顏色、排版", "價格、促銷、通路", "出席、點名、成績"], ans: _A0, exp: "板書在 harness 旁列出資安、倫理、風險、效率／可靠度。" },
+      { q: "板書中半自動化的例子是？", opts: ["手寫板書", "紙本考試", "KB.md 產出 SVG、SPA、PWA、影片、Podcast", "口頭報告"], ans: _A2, exp: "板書例子為 KB.md → SVG、SPA、PWA、影片、Podcast。" },
+      { q: "ReAct 循環的順序為何？", opts: ["Action → Plan → Obs. → Reasoning", "Plan → Reasoning → Action → Obs.", "Reasoning → Obs. → Plan → Action", "Obs. → Action → Reasoning → Plan"], ans: _A1, exp: "ReAct 依序為 Plan、Reasoning、Action、Observation。" },
+      { q: "讓 AI 達到全自動化的關鍵機制是？", opts: ["單次提示", "複製貼上", "人工排程", "Loop（heartbeat）"], ans: _A3, exp: "板書以 loop（heartbeat）連到全自動化與 Agentic AI。" }
+    ],
+
+    /* ---------- Lab ---------- */
+    mlab_nav: "6. 互動實驗室",
+    mlab_title: "互動實驗室",
+    mlab_desc: "透過四個互動活動，把課堂架構實際操作一次。",
+    mlab_labs: [
+      { title: "Lab 1：學生程度定位", desc: "調整投入、過程、產出三個指標，看看學生落在哪一段。" },
+      { title: "Lab 2：T²MI 語言辨識", desc: "閱讀情境，判斷它主要使用學科、自然還是 AI 語言。" },
+      { title: "Lab 3：AI 層次判斷", desc: "閱讀情境，判斷它屬於 L1 到 L5 的哪一個層次。" },
+      { title: "Lab 4：代理式 AI 循環步進器", desc: "逐步走過 ReAct 與 PDCA 循環。" }
+    ],
+
+    /* ---------- Resources ---------- */
+    mres_nav: "7. 外部學習資源",
+    mres_title: "外部學習資源",
+    mres_desc: "與本場工作坊相關的工具與延伸閱讀。",
+    mres_groups: [
+      { title: "課堂互動工具", links: [
+        { label: "Slido", url: "https://www.slido.com", desc: "課堂即時問答與投票。" },
+        { label: "Mentimeter", url: "https://www.mentimeter.com", desc: "互動簡報、文字雲與即時回饋。" }
+      ]},
+      { title: "AI 輔助學習", links: [
+        { label: "ChatGPT", url: "https://chatgpt.com", desc: "含 Voice Mode 語音對話與 GPTs。" },
+        { label: "Google Gemini", url: "https://gemini.google.com", desc: "Gemini 與 Gems，亦可在 Chrome 中使用。" }
+      ]},
+      { title: "延伸閱讀", links: [
+        { label: "ReAct (Yao et al., 2022)", url: "https://arxiv.org/abs/2210.03629", desc: "Reasoning 與 Acting 結合的代理式 AI 論文。" },
+        { label: "Effective context engineering for AI agents", url: "https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents", desc: "Anthropic 關於脈絡工程的說明文章。" },
+        { label: "Agent Skills", url: "https://docs.claude.com/en/docs/agents-and-tools/agent-skills/overview", desc: "Skills 的概念與使用方式。" }
+      ]},
+      { title: "講者", links: [
+        { label: "Prof. Shihmin Lo", url: "https://www.ibs.ncnu.edu.tw/index.php/faculty/tenured-professor/299-smlo", desc: "暨大國企系駱世民教授個人頁面。" }
+      ]}
+    ],
+
+    /* ---------- Analytics nav ---------- */
+    mana_nav: "8. 學習歷程分析",
+
+    date: "Version 2026.10.30",
+    copyright: "For Educational Use Only",
+    architect_label: "Architect:",
+    architect_name: "Prof. Shihmin Lo",
+    architect_url: "https://www.ibs.ncnu.edu.tw/index.php/faculty/tenured-professor/299-smlo"
+  },
+  en: {
+    brand: "AVC",
+    title: "AI Vibe Coding Workshop In-Class Note",
+    subtitle: "2026-10-30 | Shih Chien University, AIEA | Prof. Shihmin Lo (NCNU IBS)",
+    nav_modules: "Modules", nav_prev: "Previous", nav_next: "Next", nav_home: "Home",
+    key_terms: "Key Terms", flip_prompt: "Click to flip",
+    flip_status: "Read {read} / Shown {shown} / Total {total}",
+    flip_next: "Next", flip_retry: "Restart",
+    audio_read: "Audio Guide",
+    quiz_title: "Module Knowledge Check",
+    quiz_status: "Correct {correct} / Answered {answered} / Total {total}",
+    quiz_next: "Next", quiz_retry: "Retry",
+    submit: "Submit",
+    score: "Score", correct: "Correct", incorrect: "Incorrect", explanation: "Explanation",
+    overview_label: "Overview",
+    highlights_label: "Highlights",
+    deep_dive_label: "Deep Dive",
+    wrapup_label: "Wrap-up",
+    figure_label: "Figure",
+
+    analytics_title: "Learning Analytics",
+    analytics_desc: "Your time on each module, clicks, flashcard use and quiz results are recorded in this browser. Fill in your details to export a CSV record.",
+    analytics_form_title: "Student Details",
+    analytics_group: "Group", analytics_group_select: "Select", analytics_dept: "Dept & Year",
+    analytics_dept_ph: "e.g. IBS3",
+    analytics_id: "Student ID", analytics_id_ph: "e.g. 113212599",
+    analytics_name_en: "English Name", analytics_name_en_ph: "e.g. Shihmin Lo",
+    analytics_name_zh: "Chinese Name", analytics_name_zh_ph: "e.g. 王阿吉",
+    analytics_export_csv: "Export CSV Record",
+    analytics_fill_required: "Complete all fields to unlock export",
+    analytics_refresh_prompt: "This page has been updated. Refresh saved records?",
+    group_options: ["G1","G2","G3","G4","G5","G6","G7","G8","G9","G10","G11","G12","Others"],
+    analytics_total_time: "Total Study Time", analytics_total_clicks: "Total Clicks",
+    analytics_overall_acc: "Overall Quiz Accuracy",
+    analytics_card_usage: "Flashcard Usage",
+    analytics_module: "Module", analytics_time: "Time",
+    analytics_clicks: "Clicks", analytics_acc: "Accuracy",
+    analytics_correct_ans_total: "Correct / Answered / Total",
+    analytics_cards_read_total: "Read / Total",
+    analytics_no_data: "Not taken", analytics_sec: "s", analytics_times: " clicks",
+    analytics_progress_title: "Overall Progress",
+    analytics_progress_visited: "Visited", analytics_progress_not_visited: "Not visited",
+    analytics_progress_quiz_done: "Quiz done",
+    analytics_wp_title: "Weak Points & Review Suggestions",
+    analytics_wp_incorrect: "Incorrect questions:",
+    analytics_wp_goto: "→ Review this module",
+    analytics_wp_allpass: "All completed modules are at 75% or above. Excellent work!",
+    analytics_wp_saved: "💾 Your learning record is saved automatically in this browser",
+    analytics_wp_clear: "🗑 Clear Record",
+    analytics_wp_clear_confirm: "Clear all learning records? This cannot be undone.",
+    analytics_wp_tts_intro: "Here is your weak point analysis.",
+    analytics_wp_tts_module: "Module: {name}, accuracy {acc} percent. Review recommended.",
+    analytics_wp_tts_allpass: "Congratulations! All completed modules are at 75 percent or above.",
+
+    /* ---------- M0 ---------- */
+    m0_nav: "0. Executive Summary",
+    m0_title: "Executive Summary: A Driving School for the AI Era",
+    m0_intro: "This page is built from the whiteboard notes of the AI Vibe Coding Workshop held at the AIEA College of Shih Chien University on 30 October 2026. The whole session uses one metaphor: the driving school. From horse carriages to cars, electric vehicles and self-driving cars, every new generation of transport has needed new road infrastructure and new traffic rules, and teaching in the AI era is no different. The session follows five steps. It opens with the metaphor to explain why AI matters, then maps how students are distributed across input, process and output. Next it sets the language goal of moving from EMI to EML and on to T²MI, builds six classroom tools, and finally walks through five levels of AI capability, from prompt engineering to agentic AI. The teacher acts as a driving instructor: not only showing students which car to drive, but teaching them to drive it safely.",
+    m0_why: "Why does this structure matter?",
+    m0_why_desc: "AI tools change quickly, but learning outcomes depend on whether teachers build the right environment, set clear goals and help most students improve steadily. Moving from metaphor to current state, goal, environment and capability gives teachers a clear sequence for bringing AI into class.",
+    m0_flow_title: "Session Logic at a Glance",
+    m0_modules: [
+      { num: "01", title: "Core Metaphor: Driving School", desc: "New transport needs rules and infrastructure; the teacher is the driving instructor." },
+      { num: "02", title: "Where Learners Are", desc: "Students fall into a 20/60/20 distribution across input, process and output." },
+      { num: "03", title: "Target Language Framework", desc: "From EMI to EML, then on to T²MI across subject, natural and AI language." },
+      { num: "04", title: "Classroom Environment", desc: "The six classroom tools listed under '1. Environment'." },
+      { num: "05", title: "AI Capability Levels", desc: "Five levels from prompt engineering to agentic AI." }
+    ],
+    m0_stats: [
+      { val: "5", label: "Learning modules" },
+      { val: "6", label: "Classroom tools" },
+      { val: "T²", label: "Three languages × three natural languages" },
+      { val: "80%", label: "Students targeted for improvement" }
+    ],
+    m0_start: "Start Learning →",
+
+    /* ---------- M1 ---------- */
+    m1_nav: "1. Core Metaphor: Driving School",
+    m1_title: "Core Metaphor: The Driving School and Transport Evolution",
+    m1_overview: "Transport evolved from horse carriages to self-driving cars, and each generation needed new roads and new rules. This module uses that metaphor to show that, in the AI era, the teacher is a driving instructor and students are the main actors of this generation.",
+    m1_highlights: ["Carriage → Car → EV → Self-driving", "Traffic rules", "Infrastructure", "AI era", "Students at the centre", "Teacher as driving instructor"],
+    m1_p1: "The left side of the board traces a path of transport evolution. Horse carriages travelled on roads and open land, relying on curbside space. Cars needed paved asphalt roads. Electric vehicles came next, and finally self-driving cars, graded from Level 1 to Level 5. Each generation is faster and more automated than the last, but also more dependent on the conditions around it.",
+    m1_p2: "Every generation needs two supporting conditions. The first is traffic rules, the shared rules of the game. The second is infrastructure: roads, signals, charging stations and so on. Without both, even the best car cannot go anywhere.",
+    m1_p3: "The metaphor maps directly onto teaching in the AI era. AI tools are the new cars, but if the classroom lacks the right environment and rules of use, students still cannot learn effectively. Students are the main actors of this generation, and the teacher works like a driving instructor: not only telling students which car to drive, but helping them read the rules of the road, master driving skills and eventually drive safely on their own.",
+    m1_terms: [
+      { front: "Driving school metaphor", back: "The teacher acts as a driving instructor, teaching not only AI tools but also rules and safe use." },
+      { front: "Traffic rules", back: "The shared rules each generation needs, matching the ethics and norms of AI use." },
+      { front: "Infrastructure", back: "Roads and signals, matching the classroom environment and tools." },
+      { front: "Self-driving Level 1~5", back: "Levels of automation from low to high, the latest stage of transport evolution." }
+    ],
+    m1_wrapup: "This module uses transport evolution as a metaphor for how teaching changes in the AI era. From carriages to self-driving cars, every generation has needed two supports: traffic rules and infrastructure. In teaching, AI tools alone do not produce learning; teachers must first build the classroom environment and set rules of use. Students are the main actors of this generation, and the teacher, like a driving instructor, helps them handle AI safely and independently.",
+    m1_q: [
+      { q: "What is the correct order of transport evolution on the board?", opts: ["Car → Carriage → EV → Self-driving", "Carriage → Car → EV → Self-driving car", "Carriage → EV → Car → Self-driving", "EV → Car → Carriage → Self-driving"], ans: _A1, exp: "The board shows carriage, car, EV and finally Level 1~5 self-driving cars." },
+      { q: "Which two supporting conditions does each new generation of transport need?", opts: ["Traffic rules and infrastructure", "Faster engines and more passengers", "Driving licences and insurance", "Fuel prices and car prices"], ans: _A0, exp: "The board lists traffic rules and infrastructure." },
+      { q: "In this metaphor, what role does the teacher play?", opts: ["Car manufacturer", "Traffic police", "Driving instructor", "Passenger"], ans: _A2, exp: "The teacher is a driving instructor who teaches rules and driving skills." },
+      { q: "According to the board, who are the main actors of the AI generation?", opts: ["AI tools", "Students", "Education administrators", "Tech companies"], ans: _A1, exp: "Next to 'AI era', the board notes that students are the main actors." }
+    ],
+
+    /* ---------- M2 ---------- */
+    m2_nav: "2. Where Learners Are",
+    m2_title: "Where Learners Are: Student Distribution",
+    m2_overview: "Students naturally fall into a 20%, 60% and 20% distribution. This module explains the three indicators used to measure them and where teaching effort should go.",
+    m2_highlights: ["20% / 60% / 20%", "Input (preparation)", "Process (participation)", "Output (performance)", "Lift the top and middle", "Bottom 20%: not this time"],
+    m2_p1: "The bell curve on the board shows the starting distribution of students: about 20% at the top, 60% in the middle and 20% at the bottom. This is not a result of teaching; it is the state students are already in when they arrive.",
+    m2_p2: "Three indicators measure where a student stands. Input is how well the student prepares before class. Process is how much the student participates during class. Output is how well the student performs in the end. Together they form a complete learning flow.",
+    m2_p3: "The teaching goal is to raise the input, process and output of the top 20% and the middle 60%, lifting roughly eight in ten students. As for the bottom 20%, the board simply says they are, for now, beyond reach. A teacher's time and energy are limited, so rather than spreading them evenly, it is better to focus on the majority who are most able to improve.",
+    m2_terms: [
+      { front: "Input", back: "How well the student prepares before class." },
+      { front: "Process", back: "How much the student participates during class." },
+      { front: "Output", back: "How well the student performs in the end." },
+      { front: "20 / 60 / 20", back: "The starting distribution; the goal is to lift the top 20% and middle 60%." }
+    ],
+    m2_wrapup: "This module shows that students start in a 20%, 60% and 20% distribution, measured by input (preparation), process (participation) and output (performance). The goal is to lift the top and middle groups, about eighty per cent of the class, while the bottom 20% is set aside for now. This choice lets teachers focus limited effort on the students most able to improve, and it guides the environment and AI tools that follow.",
+    m2_q: [
+      { q: "What is the starting distribution of students on the board?", opts: ["10% / 80% / 10%", "20% / 60% / 20%", "33% / 33% / 33%", "30% / 40% / 30%"], ans: _A1, exp: "The bell curve on the board is marked 20%, 60% and 20%." },
+      { q: "What does 'Process' measure?", opts: ["Preparation", "Participation", "Performance", "Attendance"], ans: _A1, exp: "Process refers to how much the student participates in class." },
+      { q: "Which students is teaching aimed at lifting?", opts: ["Only the top 20%", "Only the bottom 20%", "The top 20% and the middle 60%", "All students equally"], ans: _A2, exp: "The goal is the top 20% and middle 60%; the bottom 20% is set aside for now." },
+      { q: "What does 'Output' correspond to?", opts: ["Performance", "Preparation", "Participation", "Attention"], ans: _A0, exp: "Output is how well the student performs in the end." }
+    ],
+
+    /* ---------- M3 ---------- */
+    m3_nav: "3. Target Language: EML → T²MI",
+    m3_title: "Target Language Framework: EMI → EML → T²MI",
+    m3_overview: "Rather than pushing EMI, the aim is EML: students using English as their main medium of learning. This extends further to T²MI, where subject language, natural language and AI language are used together.",
+    m3_highlights: ["EMI ✗ Instruction", "EML ○ Learning", "T²MI: three languages squared", "Subject language", "Natural language", "AI language", "Input: listen, read", "Output: speak, write"],
+    m3_p1: "EMI stands for English as a Medium of Instruction, which focuses on how teachers teach in English. On the board, Instruction is crossed out and Learning is circled. The real aim is EML, English as a Medium of Learning, where students use English as their main medium of learning. The focus moves from how teachers teach to how students learn.",
+    m3_p2: "Beyond EML, the board introduces T²MI. The first layer is three languages: subject language, human natural language (written on the board as English language) and AI language. The second layer divides natural language into three types: Mandarin, English or any foreign language, and the mother tongue. Three languages multiplied by three types of natural language is what T² means.",
+    m3_p3: "The mother tongue refers to a Mother or First Language and covers Taiwan's national languages: Indigenous languages, Taiwanese, Hakka and the languages of new immigrants. Language skills also run in two directions: listening and reading are input-oriented, while speaking and writing are output-oriented. These two directions match the input and output stages of the learning flow.",
+    m3_terms: [
+      { front: "EML", back: "English as a Medium of Learning: students use English as their main medium of learning." },
+      { front: "T²MI", back: "Three languages squared: subject, natural and AI language, with natural language split into Mandarin, foreign language and mother tongue." },
+      { front: "Subject language", back: "The terms and concepts of the academic subject." },
+      { front: "AI language", back: "The language used to work with AI, such as prompts, context and Skill instructions." },
+      { front: "Mother tongue", back: "Mother or First Language, including Indigenous languages, Taiwanese, Hakka and new immigrant languages." },
+      { front: "Input / Output-oriented", back: "Listening and reading are input-oriented; speaking and writing are output-oriented." }
+    ],
+    m3_wrapup: "This module explains a shift in language goals: from teacher-centred EMI to student-centred EML, where students use English as their main medium of learning. T²MI then adds two layers. The first is three languages: subject, natural and AI language. The second divides natural language into Mandarin, foreign language and mother tongue. Language skills split into input-oriented listening and reading, and output-oriented speaking and writing.",
+    m3_q: [
+      { q: "What does the board say should be promoted?", opts: ["EMI, teaching in English", "EML, English as the main medium of learning", "Teaching only in Chinese", "Learning only AI language"], ans: _A1, exp: "Instruction is crossed out and Learning is circled: students learning through English is the point." },
+      { q: "What are the three languages in the first layer of T²MI?", opts: ["Mandarin, English, mother tongue", "Subject, natural and AI language", "Listening, speaking, reading", "Taiwanese, Hakka, Indigenous languages"], ans: _A1, exp: "The first layer is subject, natural and AI language." },
+      { q: "In T²MI, natural language is divided into which three types?", opts: ["Mandarin, English or a foreign language, mother tongue", "Subject, AI, programming", "Input, output, translation", "British, American, Australian English"], ans: _A0, exp: "The second layer splits natural language into Mandarin, English or any foreign language, and mother tongue." },
+      { q: "Which pair of skills is output-oriented?", opts: ["Listening and reading", "Speaking and writing", "Listening and speaking", "Reading and writing"], ans: _A1, exp: "Speaking and writing are output-oriented; listening and reading are input-oriented." }
+    ],
+
+    /* ---------- M4 ---------- */
+    m4_nav: "4. Classroom: Six Tools",
+    m4_title: "Flow 1: Building the Classroom Environment",
+    m4_overview: "Under '1. Environment', the board lists six classroom tools covering teacher presentation, student notes, live interaction, a resource hub and two forms of AI-assisted learning.",
+    m4_highlights: ["Desktop camera", "In-class note", "In-class Q&A", "AI resource hub", "ChatGPT Voice Mode", "Gemini in Chrome", "Attention-based"],
+    m4_p1: "The first three tools handle basic classroom interaction. First, the teacher's desktop camera shows a traditional blackboard or an electronic whiteboard, in contrast with digital and multimedia materials prepared in advance. Second, the student's in-class note, or a recording, follows an attention-based principle: attention is scarce, so notes should help students focus on what matters. Third, in-class Q&A tools such as Slido and Mentimeter let teachers and students interact in real time.",
+    m4_p2: "The fourth tool is an AI teaching resource hub, which the board describes as a Σ fish pond. Resources on AI, education, motivation, EMI and more are gathered behind one entrance, so students can fish for what they need.",
+    m4_p3: "The last two tools support AI-assisted learning. The fifth is ChatGPT Voice Mode: students can talk with the AI and practise reading aloud, or hand a recording of their group discussion to the AI to listen to, pick out key points and summarise. The sixth is Gemini built into Chrome, which reads web pages and videos in the browser in any language, for example turning a Chinese explanation into an English transcript with time stamps.",
+    m4_terms: [
+      { front: "Desktop camera", back: "Used by the teacher to show a blackboard or whiteboard, versus ready-made digital materials." },
+      { front: "Attention-based", back: "Design centred on attention, because attention is scarce." },
+      { front: "In-class Q&A", back: "Live classroom Q&A tools such as Slido and Mentimeter." },
+      { front: "Σ fish pond", back: "The AI teaching resource hub, gathering AI, education, motivation and EMI resources." },
+      { front: "Voice Mode", back: "ChatGPT voice: students talk, read aloud or summarise group discussion recordings." },
+      { front: "Gemini in Chrome", back: "Reads web pages and videos in any language, e.g. an English transcript with time stamps." }
+    ],
+    m4_wrapup: "This module covers six classroom tools. The first three, desktop camera, in-class note and in-class Q&A, set up presentation, note-taking and interaction, designed around scarce attention. The fourth, the AI resource hub, works like a fish pond that gathers resources in one place. The last two, ChatGPT Voice Mode and Gemini in Chrome, let students listen, speak, read and write across languages with AI, a practical route to EML and T²MI.",
+    m4_q: [
+      { q: "What is the design principle of the in-class note?", opts: ["Attention-based, because attention is scarce", "The more detail the better", "The teacher writes everything", "Paper and pen only"], ans: _A0, exp: "The board says attention-based and notes that attention is scarce." },
+      { q: "How does the board describe the AI teaching resource hub?", opts: ["A motorway", "A Σ fish pond", "A library", "A driving school"], ans: _A1, exp: "The AI resource hub is described as a Σ fish pond." },
+      { q: "Which of these are examples of in-class Q&A tools?", opts: ["Slido and Mentimeter", "Excel and Word", "Photoshop", "Email"], ans: _A0, exp: "The board gives Slido and Mentimeter as examples." },
+      { q: "What is an example use of Gemini in Chrome?", opts: ["Marking exam papers automatically", "Turning a Chinese explanation into an English transcript with time stamps", "Tracking student attendance", "Making slide templates"], ans: _A1, exp: "The board example: Chinese explanation → English transcript with time stamps." }
+    ],
+
+    /* ---------- M5 ---------- */
+    m5_nav: "5. AI Capability: L1 → L5",
+    m5_title: "Flow 2: Levels of AI Capability",
+    m5_overview: "AI capability has five levels: prompt engineering, context engineering and harness engineering, then semi-automated workflows and finally fully automated agentic AI.",
+    m5_highlights: ["L1 Prompt", "L2 Context", "L3 Harness", "L4 Skills / Workflow", "L5 Agentic AI", "ReAct", "PDCA"],
+    m5_p1: "The first three levels are the basics of working with AI. L1, prompt engineering, is learning how to give instructions. L2, context engineering, is learning to give the AI the right background information. L3, harness engineering, balances security, ethics, risk, efficiency and reliability so that AI can be used safely.",
+    m5_p2: "L4 is semi-automation: from Projects such as GPTs and Gems, to Skills, and on to routinised workflows. The board's example is KB.md: first organise a Markdown knowledge base, then use it to produce SVGs, SPAs, PWAs, videos and podcasts.",
+    m5_p3: "L5 is full automation: a loop, or heartbeat, runs on a schedule and creates agentic AI. It follows the ReAct cycle of Plan, Reasoning, Action and Observation, returning to planning after each observation. It can also be understood through the PDCA cycle of Plan, Do, Check and Adjust, improving continuously.",
+    m5_terms: [
+      { front: "Prompt engineering", back: "Learning to give the AI clear instructions." },
+      { front: "Context engineering", back: "Giving the AI the right background information and data." },
+      { front: "Harness engineering", back: "Balancing security, ethics, risk, efficiency and reliability." },
+      { front: "Skills", back: "Reusable packages of task instructions at the semi-automation level." },
+      { front: "Agentic AI", back: "AI that plans, reasons, acts and observes on its own through a loop." },
+      { front: "ReAct", back: "The cycle of Plan → Reasoning → Action → Observation." }
+    ],
+    m5_wrapup: "This module sets out five levels of AI capability. L1 to L3 are prompt, context and harness engineering, with harness engineering balancing security, ethics, risk, efficiency and reliability. L4, semi-automation, centres on Projects, Skills and routinised workflows, such as producing SVGs, SPAs, PWAs and podcasts from a KB.md. L5, full automation, uses a loop to create agentic AI that runs on the ReAct and PDCA cycles.",
+    m5_q: [
+      { q: "What does harness engineering need to balance?", opts: ["Security, ethics, risk, efficiency and reliability", "Fonts, colours and layout", "Price, promotion and distribution", "Attendance, roll call and grades"], ans: _A0, exp: "Next to harness, the board lists security, ethics, risk and efficiency/reliability." },
+      { q: "What is the board's example of semi-automation?", opts: ["Handwritten board notes", "Paper exams", "KB.md producing SVG, SPA, PWA, video and podcast", "Oral presentations"], ans: _A2, exp: "The board example is KB.md → SVG, SPA, PWA, video, podcast." },
+      { q: "What is the order of the ReAct cycle?", opts: ["Action → Plan → Obs. → Reasoning", "Plan → Reasoning → Action → Obs.", "Reasoning → Obs. → Plan → Action", "Obs. → Action → Reasoning → Plan"], ans: _A1, exp: "ReAct runs Plan, Reasoning, Action, Observation." },
+      { q: "What is the key mechanism that makes AI fully automated?", opts: ["A single prompt", "Copy and paste", "Manual scheduling", "A loop (heartbeat)"], ans: _A3, exp: "The board links loop (heartbeat) to full automation and agentic AI." }
+    ],
+
+    /* ---------- Lab ---------- */
+    mlab_nav: "6. Interactive Lab",
+    mlab_title: "Interactive Lab",
+    mlab_desc: "Four hands-on activities to try out the session's framework.",
+    mlab_labs: [
+      { title: "Lab 1: Placing a Student", desc: "Adjust input, process and output to see where a student falls." },
+      { title: "Lab 2: Identifying T²MI Languages", desc: "Read each scenario and decide whether it mainly uses subject, natural or AI language." },
+      { title: "Lab 3: Identifying AI Levels", desc: "Read each scenario and decide which level from L1 to L5 it belongs to." },
+      { title: "Lab 4: Agentic AI Cycle Stepper", desc: "Step through the ReAct and PDCA cycles." }
+    ],
+
+    /* ---------- Resources ---------- */
+    mres_nav: "7. Learning Resources",
+    mres_title: "Learning Resources",
+    mres_desc: "Tools and further reading related to this workshop.",
+    mres_groups: [
+      { title: "Classroom interaction tools", links: [
+        { label: "Slido", url: "https://www.slido.com", desc: "Live Q&A and polling for class." },
+        { label: "Mentimeter", url: "https://www.mentimeter.com", desc: "Interactive slides, word clouds and live feedback." }
+      ]},
+      { title: "AI-assisted learning", links: [
+        { label: "ChatGPT", url: "https://chatgpt.com", desc: "Includes Voice Mode and GPTs." },
+        { label: "Google Gemini", url: "https://gemini.google.com", desc: "Gemini and Gems, also available in Chrome." }
+      ]},
+      { title: "Further reading", links: [
+        { label: "ReAct (Yao et al., 2022)", url: "https://arxiv.org/abs/2210.03629", desc: "The paper combining reasoning and acting in AI agents." },
+        { label: "Effective context engineering for AI agents", url: "https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents", desc: "Anthropic's article on context engineering." },
+        { label: "Agent Skills", url: "https://docs.claude.com/en/docs/agents-and-tools/agent-skills/overview", desc: "What Skills are and how they are used." }
+      ]},
+      { title: "Speaker", links: [
+        { label: "Prof. Shihmin Lo", url: "https://www.ibs.ncnu.edu.tw/index.php/faculty/tenured-professor/299-smlo", desc: "Faculty page, Department of International Business Studies, NCNU." }
+      ]}
+    ],
+
+    mana_nav: "8. Learning Analytics",
+
+    date: "Version 2026.10.30",
+    copyright: "For Educational Use Only",
+    architect_label: "Architect:",
+    architect_name: "Prof. Shihmin Lo",
+    architect_url: "https://www.ibs.ncnu.edu.tw/index.php/faculty/tenured-professor/299-smlo"
+  }
+};
+
+const _A4 = _e(_SALT, 4);
+
+/* ===== Shared components ===== */
+const H2 = ({ children, icon, number }) => (
+  <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif font-black text-[#004030] dark:text-[#D8C3A5] mb-6 flex items-start gap-3">
+    {icon && <span className="text-2xl mt-1" aria-hidden="true">{icon}</span>}
+    {number !== undefined && <span>{number}.</span>}
+    <span>{children}</span>
+  </h2>
+);
+
+const LinkCard = ({ label, url, desc }) => (
+  <a href={url} target="_blank" rel="noopener noreferrer"
+    className="block bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700 hover:border-[#004030] dark:hover:border-[#D8C3A5] hover:shadow-md transition-all group">
+    <span className="font-bold font-serif text-sm text-[#004030] dark:text-[#D8C3A5] group-hover:underline">{label}</span>
+    <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mt-1">{desc}</p>
+  </a>
+);
+
+const FlipCardDeck = ({ terms, t, moduleId, onCardRead }) => {
+  const [groupIdx, setGroupIdx] = useState(0);
+  const [flipped, setFlipped] = useState({});
+  const [readSet, setReadSet] = useState(new Set());
+  const [shownSet, setShownSet] = useState(new Set());
+  const [shuffledOrder] = useState(() => [...Array(terms.length).keys()].sort(() => Math.random() - 0.5));
+  const groupSize = 2;
+  const totalGroups = Math.ceil(terms.length / groupSize);
+  const startIdx = groupIdx * groupSize;
+  const currentCardIndices = shuffledOrder.slice(startIdx, startIdx + groupSize);
+
+  useEffect(() => {
+    const newShown = new Set(shownSet);
+    currentCardIndices.forEach(idx => newShown.add(idx));
+    if (newShown.size !== shownSet.size) setShownSet(newShown);
+  }, [groupIdx]);
+
+  const handleFlip = (origIdx) => {
+    setFlipped(f => ({ ...f, [origIdx]: !f[origIdx] }));
+    if (!readSet.has(origIdx)) {
+      const newRead = new Set(readSet); newRead.add(origIdx); setReadSet(newRead);
+      if (onCardRead) onCardRead(moduleId, newRead.size, shownSet.size, terms.length);
+    }
+  };
+  const statusText = t.flip_status.replace('{read}', readSet.size).replace('{shown}', shownSet.size).replace('{total}', terms.length);
+
+  return (
+    <div className="mt-8">
+      <h3 className="text-lg font-bold uppercase tracking-wider text-slate-500 mb-2">{t.key_terms}</h3>
+      <p className="text-sm text-slate-400 mb-4">{statusText}</p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {currentCardIndices.map((origIdx) => {
+          const term = terms[origIdx];
+          return (
+            <div key={origIdx} className="perspective cursor-pointer h-36" onClick={() => handleFlip(origIdx)}>
+              <div className={`transform-style-3d relative w-full h-full transition-transform duration-500 ${flipped[origIdx] ? 'rotate-y-180' : ''}`}>
+                <div className="backface-hidden absolute inset-0 bg-white dark:bg-slate-800 rounded-xl p-4 flex flex-col items-center justify-center border border-slate-200 dark:border-slate-700 shadow-sm">
+                  <p className="font-serif font-bold text-center text-[#004030] dark:text-[#D8C3A5]">{term.front}</p>
+                  <p className="text-xs text-slate-400 mt-2">{t.flip_prompt}</p>
+                </div>
+                <div className="backface-hidden rotate-y-180 absolute inset-0 bg-[#004030] dark:bg-slate-700 rounded-xl p-4 flex items-center justify-center">
+                  <p className="text-sm text-center text-[#D8C3A5] dark:text-slate-200 leading-relaxed">{term.back}</p>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <div className="flex items-center gap-3 mt-4">
+        <button onClick={() => { setGroupIdx(0); setFlipped({}); }}
+          className="px-4 py-2 text-sm border border-slate-300 dark:border-slate-600 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">{t.flip_retry}</button>
+        <button onClick={() => groupIdx < totalGroups - 1 && setGroupIdx(groupIdx + 1)} disabled={groupIdx >= totalGroups - 1}
+          className="px-4 py-2 text-sm bg-[#004030] dark:bg-[#D8C3A5] text-white dark:text-[#004030] font-bold rounded-lg disabled:opacity-40">{t.flip_next}</button>
+      </div>
+    </div>
+  );
+};
+
+const ModuleQuiz = ({ questions, t, moduleId, onQuizSubmit, moduleName }) => {
+  const [selected, setSelected] = useState({});
+  const [submitted, setSubmitted] = useState({});
+  const [groupIdx, setGroupIdx] = useState(0);
+  const groupSize = 2;
+  const [quizIndices] = useState(() => [...Array(questions.length).keys()].sort(() => Math.random() - 0.5));
+  const totalGroups = Math.ceil(quizIndices.length / groupSize);
+  const [shuffledMaps] = useState(() => quizIndices.map(qIdx => [...Array(questions[qIdx].opts.length).keys()].sort(() => Math.random() - 0.5)));
+
+  const totalAnswered = Object.keys(selected).length;
+  const computeCorrect = () => {
+    let c = 0;
+    quizIndices.forEach((qIdx, qi) => {
+      if (selected[qi] === undefined) return;
+      if (shuffledMaps[qi][selected[qi]] === _d(questions[qIdx].ans)) c++;
+    });
+    return c;
+  };
+  const statusText = t.quiz_status.replace('{correct}', computeCorrect()).replace('{answered}', totalAnswered).replace('{total}', quizIndices.length);
+  const currentStart = groupIdx * groupSize;
+  const currentIndices = quizIndices.slice(currentStart, currentStart + groupSize);
+
+  const handleGroupSubmit = () => {
+    const allDone = currentIndices.every((_, i) => selected[currentStart + i] !== undefined);
+    if (!allDone) return;
+    setSubmitted(s => ({ ...s, [groupIdx]: true }));
+    if (groupIdx === totalGroups - 1 || Object.keys(submitted).length + 1 === totalGroups) {
+      const wrongQs = []; let correct = 0;
+      quizIndices.forEach((qIdx, qi) => {
+        if (selected[qi] === undefined) return;
+        if (shuffledMaps[qi][selected[qi]] === _d(questions[qIdx].ans)) correct++;
+        else wrongQs.push(questions[qIdx].q);
+      });
+      onQuizSubmit(moduleId, correct, quizIndices.length, wrongQs, moduleName);
+    }
+  };
+
+  return (
+    <div className="mt-8 bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-6 border border-slate-200 dark:border-slate-700">
+      <h3 className="text-lg font-bold font-serif text-[#004030] dark:text-[#D8C3A5] mb-2">{t.quiz_title}</h3>
+      <p className="text-sm text-slate-400 mb-6">{statusText}</p>
+      {currentIndices.map((qIdx, localI) => {
+        const qi = currentStart + localI;
+        const q = questions[qIdx];
+        const sMap = shuffledMaps[qi];
+        const isGrpSub = !!submitted[groupIdx];
+        return (
+          <div key={qIdx} className="mb-6">
+            <p className="font-bold mb-3">{qi + 1}. {q.q}</p>
+            <div className="space-y-2">
+              {sMap.map((origIdx, dIdx) => {
+                const isCorrect = origIdx === _d(q.ans);
+                const isSel = selected[qi] === dIdx;
+                return (
+                  <button key={dIdx} onClick={() => !isGrpSub && setSelected(s => ({ ...s, [qi]: dIdx }))}
+                    className={`w-full text-left px-4 py-3 rounded-lg border transition-all text-sm ${isGrpSub
+                      ? isCorrect ? 'bg-green-100 border-green-500 dark:bg-green-900/30' : isSel ? 'bg-red-100 border-red-400 dark:bg-red-900/30' : 'border-slate-200 dark:border-slate-700'
+                      : isSel ? 'border-[#004030] dark:border-[#D8C3A5] bg-[#004030]/5' : 'border-slate-200 dark:border-slate-700 hover:border-slate-400'}`}>
+                    {q.opts[origIdx]}
+                  </button>
+                );
+              })}
+            </div>
+            {isGrpSub && (
+              <p className={`mt-2 text-sm italic ${shuffledMaps[qi][selected[qi]] === _d(q.ans) ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'}`}>
+                {shuffledMaps[qi][selected[qi]] === _d(q.ans) ? `✓ ${t.correct}` : `✗ ${t.incorrect}`} — {t.explanation}：{q.exp}
+              </p>
+            )}
+          </div>
+        );
+      })}
+      <div className="flex items-center gap-3 flex-wrap">
+        {!submitted[groupIdx]
+          ? <button onClick={handleGroupSubmit} disabled={!currentIndices.every((_, i) => selected[currentStart + i] !== undefined)}
+              className="px-6 py-2 bg-[#004030] dark:bg-[#D8C3A5] text-white dark:text-[#004030] font-bold rounded-lg disabled:opacity-40">{t.submit}</button>
+          : <>
+              {groupIdx < totalGroups - 1 && (
+                <button onClick={() => setGroupIdx(groupIdx + 1)} className="px-6 py-2 bg-[#004030] dark:bg-[#D8C3A5] text-white dark:text-[#004030] font-bold rounded-lg">{t.quiz_next}</button>
+              )}
+              <button onClick={() => { setGroupIdx(0); setSelected({}); setSubmitted({}); }}
+                className="px-6 py-2 border border-[#004030] dark:border-[#D8C3A5] text-[#004030] dark:text-[#D8C3A5] font-bold rounded-lg">{t.quiz_retry}</button>
+            </>}
+      </div>
+    </div>
+  );
+};
+
+/* ===== SVG primitives ===== */
+const noCtx = (e) => { e.preventDefault(); showCopyrightToast(); };
+const SvgWrap = ({ viewBox, label, children }) => (
+  <div className="w-full bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-3 sm:p-5" onContextMenu={noCtx}>
+    <svg viewBox={viewBox} className="w-full h-auto text-[#004030] dark:text-[#D8C3A5]" draggable="false" role="img" aria-label={label}>{children}</svg>
+  </div>
+);
+const B = ({ x, y, w, h, a, r = 10 }) => (
+  <rect x={x} y={y} width={w} height={h} rx={r} strokeWidth="1.5"
+    className={a ? 'fill-[#004030]/10 dark:fill-[#D8C3A5]/10 stroke-[#004030] dark:stroke-[#D8C3A5]' : 'fill-white dark:fill-slate-900 stroke-slate-300 dark:stroke-slate-600'} />
+);
+const Tx = ({ x, y, c, s = 14, b, m, a, children }) => (
+  <text x={x} y={y} textAnchor={c ? 'middle' : 'start'} fontSize={s} fontWeight={b ? 700 : 400}
+    style={{ fontFamily: 'Inter, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif' }}
+    className={a ? 'fill-[#004030] dark:fill-[#D8C3A5]' : m ? 'fill-slate-500 dark:fill-slate-400' : 'fill-slate-800 dark:fill-slate-100'}>{children}</text>
+);
+const Ar = ({ d }) => <path d={d} fill="none" stroke="#94a3b8" strokeWidth="1.5" markerEnd="url(#arr)" />;
+const Ln = ({ d }) => <path d={d} fill="none" stroke="#94a3b8" strokeWidth="1.5" />;
+const SvgDefs = () => (
+  <svg width="0" height="0" style={{ position: 'absolute' }} aria-hidden="true">
+    <defs>
+      <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M0 0L10 5L0 10z" fill="#94a3b8" />
+      </marker>
+    </defs>
+  </svg>
+);
+
+/* ===== Figures ===== */
+const FigFlow = ({ lang }) => {
+  const zh = lang === 'zh';
+  const n = zh ? ['① 比喻', '② 現況', '③ 目標', '④ 環境', '⑤ 能力'] : ['① Metaphor', '② Learners', '③ Goal', '④ Environment', '⑤ Capability'];
+  const s = zh ? ['駕訓班', '20 / 60 / 20', 'EML → T²MI', '六項工具', 'L1 → L5'] : ['Driving school', '20 / 60 / 20', 'EML → T²MI', 'Six tools', 'L1 → L5'];
+  return (
+    <SvgWrap viewBox="0 0 760 130" label="flow">
+      {n.map((v, i) => (
+        <g key={i}>
+          <B x={10 + i * 150} y={10} w={130} h={56} a={i === 4} />
+          <Tx x={75 + i * 150} y={34} c b s={14}>{v}</Tx>
+          <Tx x={75 + i * 150} y={54} c m s={12}>{s[i]}</Tx>
+          {i < 4 && <Ar d={`M${142 + i * 150} 38H${158 + i * 150}`} />}
+        </g>
+      ))}
+      <Ar d="M675 68V95H225V70" />
+      <Tx x={450} y={116} c m s={12}>{zh ? '回饋提升學生程度' : 'Feedback lifts student levels'}</Tx>
+    </SvgWrap>
+  );
+};
+
+const Fig1 = ({ lang }) => {
+  const zh = lang === 'zh';
+  const n = zh ? ['馬車', '汽車', '電動車', '無人／自駕車'] : ['Carriage', 'Car', 'Electric vehicle', 'Self-driving car'];
+  const s = zh ? ['馬路・curbside', '柏油路', '', 'Level 1~5'] : ['Roads · curbside', 'Asphalt roads', '', 'Level 1~5'];
+  const xs = [10, 203, 396, 589];
+  return (
+    <SvgWrap viewBox="0 0 760 190" label="transport">
+      {xs.map((x, i) => (
+        <g key={i}>
+          <B x={x} y={10} w={160} h={62} a={i === 3} />
+          <Tx x={x + 80} y={s[i] ? 37 : 46} c b s={15}>{n[i]}</Tx>
+          {s[i] && <Tx x={x + 80} y={58} c m s={12}>{s[i]}</Tx>}
+          {i < 3 && <Ar d={`M${x + 162} 41H${xs[i + 1] - 3}`} />}
+        </g>
+      ))}
+      <Tx x={10} y={146} m s={13}>{zh ? '支撐條件' : 'Supports'}</Tx>
+      <B x={80} y={118} w={140} h={46} r={23} />
+      <Tx x={150} y={146} c s={13}>{zh ? '交通規範' : 'Traffic rules'}</Tx>
+      <B x={232} y={118} w={150} h={46} r={23} />
+      <Tx x={307} y={146} c s={13}>Infrastructure</Tx>
+      <Ar d="M392 141H432" />
+      <B x={440} y={118} w={310} h={46} r={23} a />
+      <Tx x={595} y={146} c a b s={13}>{zh ? 'AI 時代：學生是主體・教師如駕訓班' : 'AI era: students lead, teacher as instructor'}</Tx>
+    </SvgWrap>
+  );
+};
+
+const Fig2 = ({ lang }) => {
+  const zh = lang === 'zh';
+  const curve = 'M20 200C110 200 140 50 220 50C300 50 330 200 420 200Z';
+  const ipo = zh ? ['① Input 投入（準備）', '② Process 過程（參與）', '③ Output 產出（表現）'] : ['① Input (preparation)', '② Process (participation)', '③ Output (performance)'];
+  return (
+    <SvgWrap viewBox="0 0 760 270" label="distribution">
+      <defs>
+        <clipPath id="f2l"><rect x="10" y="40" width="110" height="170" /></clipPath>
+        <clipPath id="f2t"><rect x="120" y="40" width="310" height="170" /></clipPath>
+      </defs>
+      <path d={curve} clipPath="url(#f2l)" className="fill-slate-200 dark:fill-slate-700" />
+      <path d={curve} clipPath="url(#f2t)" className="fill-[#004030]/15 dark:fill-[#D8C3A5]/15" />
+      <path d="M20 200C110 200 140 50 220 50C300 50 330 200 420 200" fill="none" stroke="currentColor" strokeWidth="2" />
+      <Ln d="M10 200H430" />
+      <path d="M120 200V95M320 200V95" stroke="#94a3b8" strokeDasharray="4 4" />
+      <Tx x={220} y={150} c a b s={22}>60%</Tx>
+      <Tx x={70} y={222} c m s={13}>{zh ? '後段 20%' : 'Bottom 20%'}</Tx>
+      <Tx x={220} y={222} c m s={13}>{zh ? '中段 60%' : 'Middle 60%'}</Tx>
+      <Tx x={370} y={222} c m s={13}>{zh ? '前段 20%' : 'Top 20%'}</Tx>
+      <path d="M125 232V238H425V232" fill="none" stroke="currentColor" strokeWidth="1.5" />
+      <Tx x={275} y={258} c a b s={13}>{zh ? '提升目標' : 'Target to lift'}</Tx>
+      <Tx x={70} y={258} c m s={12}>{zh ? '姑且沒緣分' : 'Not this time'}</Tx>
+      {ipo.map((v, i) => (
+        <g key={i}>
+          <B x={470} y={20 + i * 75} w={280} h={50} />
+          <Tx x={610} y={51 + i * 75} c b s={14}>{v}</Tx>
+          {i < 2 && <Ar d={`M610 ${72 + i * 75}V${92 + i * 75}`} />}
+        </g>
+      ))}
+    </SvgWrap>
+  );
+};
+
+const Fig3 = ({ lang }) => {
+  const zh = lang === 'zh';
+  const r1 = [['EMI', 'Medium of Instruction ✗'], ['EML', zh ? '以英文為學習的主要媒介 ○' : 'Medium of Learning ○'], ['T²MI', zh ? '三語的平方' : 'Three languages squared']];
+  const r2 = [['Subject language', zh ? '學科語言' : 'Academic subject'], ['Natural language', zh ? '人類自然語言' : 'Human language'], ['AI language', zh ? 'AI 語言' : 'Working with AI']];
+  const r3 = zh ? ['華語', '外語', '母語'] : ['Mandarin', 'Foreign', 'Mother'];
+  const r3x = [[270, 65], [345, 70], [425, 65]];
+  const xs = [10, 270, 530];
+  return (
+    <SvgWrap viewBox="0 0 760 262" label="language">
+      {r1.map((v, i) => (
+        <g key={i}>
+          <B x={xs[i]} y={10} w={220} h={60} a={i === 2} />
+          <Tx x={xs[i] + 110} y={37} c b s={18} a={i === 2} m={i === 0}>{v[0]}</Tx>
+          <Tx x={xs[i] + 110} y={58} c m s={12}>{v[1]}</Tx>
+        </g>
+      ))}
+      <Ar d="M232 40H266" /><Ar d="M492 40H526" />
+      <Ln d="M640 70V88M120 88H640M120 88V102M380 88V102M640 88V102" />
+      {r2.map((v, i) => (
+        <g key={i}>
+          <B x={xs[i]} y={102} w={220} h={50} />
+          <Tx x={xs[i] + 110} y={124} c b s={15}>{v[0]}</Tx>
+          <Tx x={xs[i] + 110} y={143} c m s={12}>{v[1]}</Tx>
+        </g>
+      ))}
+      <Ln d="M380 152V166M302 166H457M302 166V180M380 166V180M457 166V180" />
+      {r3.map((v, i) => (
+        <g key={i}>
+          <B x={r3x[i][0]} y={180} w={r3x[i][1]} h={38} />
+          <Tx x={r3x[i][0] + r3x[i][1] / 2} y={204} c s={13}>{v}</Tx>
+        </g>
+      ))}
+      <Tx x={380} y={240} c m s={11}>{zh ? '母語：原住民語・台語・客語・新住民語' : 'Mother tongue: Indigenous, Taiwanese, Hakka, new immigrant'}</Tx>
+      <rect x="10" y="180" width="220" height="70" rx="10" className="fill-slate-50 dark:fill-slate-900 stroke-slate-200 dark:stroke-slate-700" strokeWidth="1.5" />
+      <Tx x={24} y={208} s={13}>{zh ? 'Input-oriented：聽・讀' : 'Input-oriented: listen, read'}</Tx>
+      <Tx x={24} y={234} s={13}>{zh ? 'Output-oriented：說・寫' : 'Output-oriented: speak, write'}</Tx>
+      <rect x="530" y="180" width="220" height="70" rx="10" className="fill-slate-50 dark:fill-slate-900 stroke-slate-200 dark:stroke-slate-700" strokeWidth="1.5" />
+      <Tx x={544} y={208} s={13}>{zh ? 'T² ＝ 第一層：三語' : 'T² = three languages'}</Tx>
+      <Tx x={544} y={234} s={13}>{zh ? '　× 第二層：自然語言三類' : '× three natural languages'}</Tx>
+    </SvgWrap>
+  );
+};
+
+const Fig4 = ({ lang }) => {
+  const zh = lang === 'zh';
+  const items = zh
+    ? [['Desktop camera', '老師用：板書／電子白板', 'vs. 數位／多媒體教材'], ['In-class note', '學生用：or recording', '注意力稀缺 → attention-based'], ['In-class Q&A', '師生即時互動', 'Slido、Mentimeter'], ['AI 教學資源總入口', 'Σ 魚池', 'AI・Education・Motivation・EMI'], ['ChatGPT Voice Mode', '學生對話、唸讀', '小組錄音 → 聽・呼喚・總整理'], ['Chrome 內建 Gemini', '網頁／影片，不限語言', '中文解說 → 英文逐字稿']]
+    : [['Desktop camera', 'Teacher: board / whiteboard', 'vs. ready digital materials'], ['In-class note', 'Student: or recording', 'Scarce attention → attention-based'], ['In-class Q&A', 'Live interaction', 'Slido, Mentimeter'], ['AI resource hub', 'Σ fish pond', 'AI · Education · Motivation · EMI'], ['ChatGPT Voice Mode', 'Talk, read aloud', 'Group recording → summary'], ['Gemini in Chrome', 'Pages / videos, any language', 'Chinese talk → English transcript']];
+  return (
+    <SvgWrap viewBox="0 0 760 240" label="tools">
+      {items.map((v, i) => {
+        const x = 5 + (i % 3) * 255, y = 5 + Math.floor(i / 3) * 120;
+        return (
+          <g key={i}>
+            <B x={x} y={y} w={240} h={105} />
+            <Tx x={x + 16} y={y + 30} a b s={14}>{i + 1}</Tx>
+            <Tx x={x + 36} y={y + 30} b s={14}>{v[0]}</Tx>
+            <Tx x={x + 16} y={y + 60} m s={12}>{v[1]}</Tx>
+            <Tx x={x + 16} y={y + 84} m s={12}>{v[2]}</Tx>
+          </g>
+        );
+      })}
+    </SvgWrap>
+  );
+};
+
+const Fig5 = ({ lang }) => {
+  const zh = lang === 'zh';
+  const nm = ['Prompt', 'Context', 'Harness', 'Skills / Workflow', 'Agentic AI'];
+  const sb = zh ? ['提示工程', '脈絡工程', '資安・倫理・風險', '半自動化', '全自動化・Loop'] : ['Instructions', 'Background info', 'Security · ethics · risk', 'Semi-automation', 'Full automation · loop'];
+  return (
+    <SvgWrap viewBox="0 0 760 290" label="levels">
+      {nm.map((v, i) => {
+        const x = 10 + i * 150, y = 190 - i * 42;
+        return (
+          <g key={i}>
+            <B x={x} y={y} w={140} h={62} a={i === 4} />
+            <Tx x={x + 12} y={y + 20} a b s={12}>{`L${i + 1}`}</Tx>
+            <Tx x={x + 12} y={y + 40} b s={13}>{v}</Tx>
+            <Tx x={x + 12} y={y + 56} m s={11}>{sb[i]}</Tx>
+            {i < 4 && <Ar d={`M${x + 140} ${y + 31}L${x + 148} ${y - 11}`} />}
+          </g>
+        );
+      })}
+      <Ln d="M10 264H440M460 264H600M610 264H750" />
+      <Tx x={225} y={284} c m s={12}>{zh ? 'L1–L3 基本功' : 'L1–L3 Fundamentals'}</Tx>
+      <Tx x={530} y={284} c m s={12}>{zh ? 'L4 半自動化' : 'L4 Semi-automation'}</Tx>
+      <Tx x={680} y={284} c a b s={12}>{zh ? 'L5 全自動化' : 'L5 Full automation'}</Tx>
+    </SvgWrap>
+  );
+};
+
+const FIGS = { 1: Fig1, 2: Fig2, 3: Fig3, 4: Fig4, 5: Fig5 };
+
+/* ===== Labs (top-level) ===== */
+const LT = {
+  zh: {
+    in: '投入（準備）', pr: '過程（參與）', out: '產出（表現）', avg: '平均',
+    low: '後段 20%：姑且沒緣分', mid: '中段 60%：提升目標，優先投入', high: '前段 20%：提升目標，持續挑戰',
+    note: '門檻（30 / 70）僅為示意，方便操作理解。',
+    check: '查看答案', reset: '重設', right: '✓ 正確', wrong: '✗ 不正確，正確答案：',
+    langOpts: ['學科語言', '自然語言', 'AI 語言'],
+    langItems: [
+      { s: '向 ChatGPT 下指令，請它整理小組討論錄音', a: _A2 },
+      { s: '在報告中正確使用「價值鏈」「五力分析」等學科術語', a: _A0 },
+      { s: '用客語向家人說明今天學到的內容', a: _A1 },
+      { s: '用英文向國際交換生解釋課堂重點', a: _A1 },
+      { s: '撰寫 Skill 指令，讓 AI 依固定流程產出網頁', a: _A2 }
+    ],
+    lvOpts: ['L1 Prompt', 'L2 Context', 'L3 Harness', 'L4 半自動化', 'L5 全自動化'],
+    lvItems: [
+      { s: '在 ChatGPT 輸入一句「幫我摘要這篇文章」', a: _A0 },
+      { s: '上傳課綱與評分標準，再請 AI 依此回饋學生作業', a: _A1 },
+      { s: '訂定規則：不上傳學生個資，並抽查 AI 輸出的正確性', a: _A2 },
+      { s: '建立一個 Skill，每次放入 KB.md 就產出 SPA 網頁', a: _A3 },
+      { s: '設定 AI 每天定時檢查新資料、規劃並執行更新、再回報結果', a: _A4 }
+    ],
+    next: '下一步', auto: '自動播放', stop: '停止',
+    react: [['Plan', '規劃目標與步驟'], ['Reasoning', '推理下一步該怎麼做'], ['Action', '執行動作，例如呼叫工具'], ['Obs.', '觀察結果，再回到規劃']],
+    pdca: [['Plan', '規劃'], ['Do', '執行'], ['Check', '檢查'], ['Adjust', '調整，再回到規劃']],
+    step: '目前步驟'
+  },
+  en: {
+    in: 'Input (preparation)', pr: 'Process (participation)', out: 'Output (performance)', avg: 'Average',
+    low: 'Bottom 20%: not this time', mid: 'Middle 60%: target to lift, first priority', high: 'Top 20%: target to lift, keep stretching',
+    note: 'The 30 / 70 thresholds are illustrative only.',
+    check: 'Check', reset: 'Reset', right: '✓ Correct', wrong: '✗ Not quite. Answer: ',
+    langOpts: ['Subject language', 'Natural language', 'AI language'],
+    langItems: [
+      { s: 'Telling ChatGPT to summarise a group discussion recording', a: _A2 },
+      { s: 'Using subject terms such as "value chain" and "five forces" correctly in a report', a: _A0 },
+      { s: 'Explaining what you learnt today to your family in Hakka', a: _A1 },
+      { s: 'Explaining the key points of class to an exchange student in English', a: _A1 },
+      { s: 'Writing a Skill so the AI builds web pages through a fixed workflow', a: _A2 }
+    ],
+    lvOpts: ['L1 Prompt', 'L2 Context', 'L3 Harness', 'L4 Semi-automation', 'L5 Full automation'],
+    lvItems: [
+      { s: 'Typing "summarise this article" into ChatGPT', a: _A0 },
+      { s: 'Uploading the syllabus and rubric, then asking the AI to give feedback on assignments', a: _A1 },
+      { s: 'Setting rules: no student personal data uploaded, and AI output spot-checked for accuracy', a: _A2 },
+      { s: 'Building a Skill that turns any KB.md into an SPA', a: _A3 },
+      { s: 'Setting the AI to check for new data daily, plan and run updates, then report back', a: _A4 }
+    ],
+    next: 'Next step', auto: 'Auto play', stop: 'Stop',
+    react: [['Plan', 'Set the goal and steps'], ['Reasoning', 'Reason about what to do next'], ['Action', 'Take an action, e.g. call a tool'], ['Obs.', 'Observe the result, then plan again']],
+    pdca: [['Plan', 'Plan'], ['Do', 'Do'], ['Check', 'Check'], ['Adjust', 'Adjust, then plan again']],
+    step: 'Current step'
+  }
+};
+const labCard = 'bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700';
+const btnP = 'px-4 py-2 text-sm bg-[#004030] dark:bg-[#D8C3A5] text-white dark:text-[#004030] font-bold rounded-lg disabled:opacity-40';
+const btnS = 'px-4 py-2 text-sm border border-slate-300 dark:border-slate-600 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700';
+
+const LabPlacement = ({ lang, info }) => {
+  const L = LT[lang];
+  const [v, setV] = useState([50, 50, 50]);
+  const avg = Math.round((v[0] + v[1] + v[2]) / 3);
+  const seg = avg < 30 ? 'low' : avg <= 70 ? 'mid' : 'high';
+  return (
+    <div className={labCard}>
+      <h3 className="font-serif font-bold text-lg text-[#004030] dark:text-[#D8C3A5] mb-1">{info.title}</h3>
+      <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">{info.desc}</p>
+      {[L.in, L.pr, L.out].map((lab, i) => (
+        <label key={i} className="block mb-3 text-sm">
+          <span className="flex justify-between"><span>{lab}</span><span className="font-bold">{v[i]}</span></span>
+          <input type="range" min="0" max="100" value={v[i]} onChange={e => { const n = [...v]; n[i] = +e.target.value; setV(n); }} className="w-full accent-[#004030] dark:accent-[#D8C3A5]" />
+        </label>
+      ))}
+      <div className="relative h-8 mt-4 rounded-lg overflow-hidden flex text-[11px] font-bold">
+        <div className="w-[30%] bg-slate-200 dark:bg-slate-700 flex items-center justify-center">20%</div>
+        <div className="w-[40%] bg-[#004030]/15 dark:bg-[#D8C3A5]/15 flex items-center justify-center">60%</div>
+        <div className="w-[30%] bg-[#004030]/30 dark:bg-[#D8C3A5]/30 flex items-center justify-center">20%</div>
+        <div className="absolute -top-1 -bottom-1 w-0.5 bg-red-500 transition-all" style={{ left: `calc(${avg}% - 2px)` }} />
+      </div>
+      <p className="mt-4 text-sm">{L.avg}：<b>{avg}</b></p>
+      <p className={`mt-1 font-bold ${seg === 'low' ? 'text-slate-500' : 'text-[#004030] dark:text-[#D8C3A5]'}`}>{L[seg]}</p>
+      <p className="mt-2 text-xs text-slate-400">{L.note}</p>
+    </div>
+  );
+};
+
+const ScenarioLab = ({ lang, info, kind }) => {
+  const L = LT[lang];
+  const items = kind === 'lang' ? L.langItems : L.lvItems;
+  const opts = kind === 'lang' ? L.langOpts : L.lvOpts;
+  const [pick, setPick] = useState({});
+  const [shown, setShown] = useState(false);
+  const score = items.filter((it, i) => pick[i] === _d(it.a)).length;
+  return (
+    <div className={labCard}>
+      <h3 className="font-serif font-bold text-lg text-[#004030] dark:text-[#D8C3A5] mb-1">{info.title}</h3>
+      <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">{info.desc}</p>
+      <div className="space-y-4">
+        {items.map((it, i) => (
+          <div key={i}>
+            <p className="text-sm font-medium mb-2">{i + 1}. {it.s}</p>
+            <div className="flex flex-wrap gap-2">
+              {opts.map((o, j) => {
+                const sel = pick[i] === j, ok = j === _d(it.a);
+                const cls = shown ? (ok ? 'bg-green-100 border-green-500 dark:bg-green-900/30' : sel ? 'bg-red-100 border-red-400 dark:bg-red-900/30' : 'border-slate-200 dark:border-slate-700')
+                  : sel ? 'border-[#004030] dark:border-[#D8C3A5] bg-[#004030]/10 dark:bg-[#D8C3A5]/10' : 'border-slate-200 dark:border-slate-700 hover:border-slate-400';
+                return <button key={j} onClick={() => !shown && setPick(p => ({ ...p, [i]: j }))} className={`px-3 py-1.5 text-xs rounded-full border ${cls}`}>{o}</button>;
+              })}
+            </div>
+            {shown && <p className={`text-xs mt-1 ${pick[i] === _d(it.a) ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'}`}>{pick[i] === _d(it.a) ? L.right : L.wrong + opts[_d(it.a)]}</p>}
+          </div>
+        ))}
+      </div>
+      <div className="flex items-center gap-3 mt-5">
+        <button className={btnP} disabled={Object.keys(pick).length < items.length || shown} onClick={() => setShown(true)}>{L.check}</button>
+        <button className={btnS} onClick={() => { setPick({}); setShown(false); }}>{L.reset}</button>
+        {shown && <span className="text-sm font-bold">{score} / {items.length}</span>}
+      </div>
+    </div>
+  );
+};
+
+const LabCycle = ({ lang, info }) => {
+  const L = LT[lang];
+  const [mode, setMode] = useState('react');
+  const [idx, setIdx] = useState(0);
+  const [auto, setAuto] = useState(false);
+  const steps = L[mode];
+  useEffect(() => {
+    if (!auto) return;
+    const id = setInterval(() => setIdx(i => (i + 1) % 4), 1500);
+    return () => clearInterval(id);
+  }, [auto]);
+  const pos = [[150, 40], [260, 130], [150, 220], [40, 130]];
+  return (
+    <div className={labCard}>
+      <h3 className="font-serif font-bold text-lg text-[#004030] dark:text-[#D8C3A5] mb-1">{info.title}</h3>
+      <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">{info.desc}</p>
+      <div className="flex gap-2 mb-4">
+        {['react', 'pdca'].map(m => (
+          <button key={m} onClick={() => { setMode(m); setIdx(0); }}
+            className={`px-3 py-1.5 text-xs rounded-full border font-bold ${mode === m ? 'bg-[#004030] text-white border-[#004030] dark:bg-[#D8C3A5] dark:text-[#004030] dark:border-[#D8C3A5]' : 'border-slate-300 dark:border-slate-600'}`}>{m === 'react' ? 'ReAct' : 'PDCA'}</button>
+        ))}
+      </div>
+      <div className="flex justify-center" onContextMenu={noCtx}>
+        <svg viewBox="0 0 300 260" className="w-full max-w-xs h-auto text-[#004030] dark:text-[#D8C3A5]" draggable="false">
+          <circle cx="150" cy="130" r="90" fill="none" stroke="#94a3b8" strokeWidth="1.5" strokeDasharray="5 5" />
+          {pos.map((p, i) => (
+            <g key={i}>
+              <circle cx={p[0]} cy={p[1]} r="32" strokeWidth="2"
+                className={i === idx ? 'fill-[#004030] dark:fill-[#D8C3A5] stroke-[#004030] dark:stroke-[#D8C3A5]' : 'fill-white dark:fill-slate-900 stroke-slate-300 dark:stroke-slate-600'} />
+              <text x={p[0]} y={p[1] + 5} textAnchor="middle" fontSize="11" fontWeight="700"
+                className={i === idx ? 'fill-white dark:fill-[#004030]' : 'fill-slate-700 dark:fill-slate-200'}>{steps[i][0]}</text>
+            </g>
+          ))}
+          <text x="150" y="135" textAnchor="middle" fontSize="12" className="fill-slate-400">↻</text>
+        </svg>
+      </div>
+      <p className="text-center text-sm mt-2"><span className="text-slate-400">{L.step}：</span><b>{steps[idx][0]}</b> — {steps[idx][1]}</p>
+      <div className="flex justify-center gap-3 mt-4">
+        <button className={btnP} onClick={() => setIdx(i => (i + 1) % 4)}>{L.next}</button>
+        <button className={btnS} onClick={() => setAuto(a => !a)}>{auto ? L.stop : L.auto}</button>
+        <button className={btnS} onClick={() => { setIdx(0); setAuto(false); }}>{L.reset}</button>
+      </div>
+    </div>
+  );
+};
+
+/* ===== App ===== */
+const MOD_ICONS = ['🧭', '🚗', '📊', '🗣️', '🏫', '🤖', '🧪', '🌐', '📈'];
+const LS_KEY = 'AVC_SPA_analytics';
+const LS_STU = 'AVC_SPA_student';
+const LS_VER = 'AVC_SPA_version';
+const emptyAnalytics = () => ({
+  time: Array(TOTAL).fill(0), clicks: Array(TOTAL).fill(0),
+  quizCorrect: Array(TOTAL).fill(0), quizTotal: Array(TOTAL).fill(0),
+  cardsRead: Array(TOTAL).fill(0), cardsTotal: Array(TOTAL).fill(0),
+  wrongTopics: {}
+});
+const loadLS = (key, fb) => { try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fb; } catch { return fb; } };
+
+function App() {
+  const [lang, setLang] = useState('en');
+  const [isDark, setIsDark] = useState(true);
+  const [module, setModule] = useState(0);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [ttsState, setTtsState] = useState('idle');
+  const [studentInfo, setStudentInfo] = useState(() => loadLS(LS_STU, { group: '', dept: '', id: '', nameEn: '', nameZh: '' }));
+  const [analytics, setAnalytics] = useState(() => {
+    const a = loadLS(LS_KEY, null);
+    return a && Array.isArray(a.time) && a.time.length === TOTAL ? a : emptyAnalytics();
+  });
+  const menuRef = useRef(null);
+  const moduleRef = useRef(0);
+  const t = dict[lang];
+
+  useEffect(() => { document.documentElement.classList.toggle('dark', isDark); }, [isDark]);
+  useEffect(() => { document.documentElement.lang = lang === 'zh' ? 'zh-Hant-TW' : 'en-GB'; }, [lang]);
+  useEffect(() => { try { localStorage.setItem(LS_KEY, JSON.stringify(analytics)); } catch {} }, [analytics]);
+  useEffect(() => { try { localStorage.setItem(LS_STU, JSON.stringify(studentInfo)); } catch {} }, [studentInfo]);
+  useEffect(() => { moduleRef.current = module; }, [module]);
+
+  useEffect(() => {
+    try {
+      const v = localStorage.getItem(LS_VER);
+      if (v && v !== APP_VER && window.confirm(dict.en.analytics_refresh_prompt + '\n' + dict.zh.analytics_refresh_prompt)) {
+        setAnalytics(emptyAnalytics());
+      }
+      localStorage.setItem(LS_VER, APP_VER);
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      if (document.visibilityState !== 'visible') return;
+      setAnalytics(a => { const tm = [...a.time]; tm[moduleRef.current] += 1; return { ...a, time: tm }; });
+    }, 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  useEffect(() => {
+    const h = (e) => { if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false); };
+    document.addEventListener('mousedown', h);
+    return () => document.removeEventListener('mousedown', h);
+  }, []);
+
+  useEffect(() => { if ('speechSynthesis' in window) speechSynthesis.cancel(); setTtsState('idle'); }, [module, lang]);
+
+  const navTitle = (i) => i === 0 ? t.m0_nav : i <= NUM_LEARN ? t[`m${i}_nav`] : i === IDX_LAB ? t.mlab_nav : i === IDX_RES ? t.mres_nav : t.mana_nav;
+  const pageTitle = (i) => i === 0 ? t.m0_title : i <= NUM_LEARN ? t[`m${i}_title`] : i === IDX_LAB ? t.mlab_title : i === IDX_RES ? t.mres_title : t.analytics_title;
+  const modulesList = [...Array(TOTAL).keys()].map(i => ({ id: i, num: i, icon: MOD_ICONS[i], nav: navTitle(i), title: pageTitle(i) }));
+  const sideIcon = (i) => i === IDX_LAB ? <IconZapLab size={16} /> : i === IDX_RES ? <IconGlobe size={16} /> : i === IDX_ANA ? <IconActivity size={16} /> : <span aria-hidden="true">{MOD_ICONS[i]}</span>;
+
+  const go = (i) => { setModule(i); setMenuOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+
+  const handleQuizSubmit = (mid, correct, total, wrongQs) => {
+    setAnalytics(a => {
+      const qc = [...a.quizCorrect], qt = [...a.quizTotal];
+      qc[mid] = correct; qt[mid] = total;
+      const wt = { ...a.wrongTopics }; wt[mid] = wrongQs || [];
+      return { ...a, quizCorrect: qc, quizTotal: qt, wrongTopics: wt };
+    });
+  };
+  const handleCardRead = (mid, readCount, shownCount, totalCount) => {
+    setAnalytics(a => {
+      const cr = [...a.cardsRead], ct = [...a.cardsTotal];
+      cr[mid] = Math.max(cr[mid], readCount); ct[mid] = totalCount;
+      return { ...a, cardsRead: cr, cardsTotal: ct };
+    });
+  };
+
+  /* ---------- TTS ---------- */
+  const handleTTS = (action) => {
+    if (!('speechSynthesis' in window)) return;
+    if (action === 'stop') { speechSynthesis.cancel(); setTtsState('idle'); return; }
+    if (action === 'pause') { speechSynthesis.pause(); setTtsState('paused'); return; }
+    if (action === 'play') {
+      if (ttsState === 'paused') { speechSynthesis.resume(); setTtsState('playing'); return; }
+      speechSynthesis.cancel();
+      const sep = lang === 'zh' ? '。 ' : '. ';
+      let texts = [];
+      if (module === 0) {
+        texts = [t.m0_title, t.m0_intro, t.m0_why, t.m0_why_desc,
+          ...(t.m0_stats || []).map(s => `${s.label}: ${s.val}`),
+          ...(t.m0_modules || []).map(m => `${m.title}. ${m.desc}`)];
+      } else if (module >= 1 && module <= NUM_LEARN) {
+        const mk = `m${module}`;
+        texts = [t[`${mk}_title`], t[`${mk}_overview`], ...(t[`${mk}_highlights`] || []),
+          ...[1, 2, 3, 4, 5, 6, 7, 8].map(n => t[`${mk}_p${n}`]).filter(Boolean),
+          t[`${mk}_wrapup`], ...(t[`${mk}_terms`] || []).flatMap(tm => [tm.front, tm.back])];
+      } else if (module === IDX_LAB) {
+        texts = [t.mlab_title, t.mlab_desc, ...(t.mlab_labs || []).map(l => `${l.title}. ${l.desc || ''}`)];
+      } else if (module === IDX_RES) {
+        texts = [t.mres_title, t.mres_desc, ...(t.mres_groups || []).flatMap(g => [g.title, ...g.links.map(l => `${l.label}. ${l.desc}`)])];
+      } else if (module === IDX_ANA) {
+        const tc = analytics.quizCorrect.reduce((a, b) => a + b, 0);
+        const ta = analytics.quizTotal.reduce((a, b) => a + b, 0);
+        const oa = ta > 0 ? Math.round(tc / ta * 100) : 0;
+        const wk = [];
+        for (let i = 1; i <= NUM_LEARN; i++) {
+          if (analytics.quizTotal[i] > 0) {
+            const a = Math.round(analytics.quizCorrect[i] / analytics.quizTotal[i] * 100);
+            if (a < 75) wk.push({ name: modulesList[i].title, acc: a });
+          }
+        }
+        wk.sort((a, b) => a.acc - b.acc);
+        texts = [t.analytics_title, t.analytics_desc,
+          `${t.analytics_total_time}: ${analytics.time.reduce((a, b) => a + b, 0)}${t.analytics_sec}`,
+          `${t.analytics_total_clicks}: ${analytics.clicks.reduce((a, b) => a + b, 0)}${t.analytics_times}`,
+          `${t.analytics_overall_acc}: ${oa}%`];
+        if (wk.length) { texts.push(t.analytics_wp_tts_intro); wk.forEach(w => texts.push(t.analytics_wp_tts_module.replace('{name}', w.name).replace('{acc}', w.acc))); }
+        else if (ta > 0) texts.push(t.analytics_wp_tts_allpass);
+      }
+      texts = texts.filter(Boolean).map(s => String(s).replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/gu, ''));
+      const utt = new SpeechSynthesisUtterance(texts.join(sep));
+      utt.rate = 0.95;
+      const voices = speechSynthesis.getVoices();
+      if (lang === 'zh') {
+        const v = voices.find(v => v.lang === 'zh-TW' && v.name.includes('Yating')) || voices.find(v => v.lang === 'zh-TW') || voices.find(v => v.lang.startsWith('zh'));
+        if (v) utt.voice = v; utt.lang = 'zh-TW';
+      } else {
+        const v = voices.find(v => v.lang === 'en-GB' && (v.name.includes('Male') || v.name.includes('Daniel'))) || voices.find(v => v.lang === 'en-GB') || voices.find(v => v.lang.startsWith('en'));
+        if (v) utt.voice = v; utt.lang = 'en-GB';
+      }
+      utt.onend = () => setTtsState('idle');
+      utt.onerror = () => setTtsState('idle');
+      speechSynthesis.speak(utt);
+      setTtsState('playing');
+    }
+  };
+
+  /* ---------- Views ---------- */
+  const renderHome = () => (
+    <div className="space-y-8 animate-fade-in">
+      <H2 icon={MOD_ICONS[0]} number={0}>{t.m0_title}</H2>
+      <div className="rounded-2xl bg-[#004030] dark:bg-slate-800 p-6 md:p-10 border border-[#D8C3A5]/30 shadow-lg">
+        <p className="text-[#D8C3A5] text-xs sm:text-sm tracking-widest uppercase font-bold mb-3">{t.subtitle}</p>
+        <p className="text-base md:text-lg leading-relaxed text-slate-100">{t.m0_intro}</p>
+      </div>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {t.m0_stats.map((s, i) => (
+          <div key={i} className="bg-white dark:bg-slate-800 rounded-xl p-5 border border-slate-200 dark:border-slate-700 text-center">
+            <p className="font-serif font-black text-3xl text-[#004030] dark:text-[#D8C3A5]">{s.val}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">{s.label}</p>
+          </div>
+        ))}
+      </div>
+      <div className="bg-[#004030]/5 dark:bg-[#D8C3A5]/5 rounded-xl p-5 border-l-4 border-[#D8C3A5]">
+        <h3 className="font-serif font-bold text-lg text-[#004030] dark:text-[#D8C3A5] mb-2">{t.m0_why}</h3>
+        <p className="text-slate-700 dark:text-slate-300 leading-relaxed">{t.m0_why_desc}</p>
+      </div>
+      <div>
+        <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 mb-3">{t.m0_flow_title}</h3>
+        <FigFlow lang={lang} />
+      </div>
+      <div className="space-y-3">
+        {t.m0_modules.map((m, i) => (
+          <button key={i} onClick={() => go(i + 1)}
+            className="w-full text-left flex items-start gap-4 bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700 hover:border-[#004030] dark:hover:border-[#D8C3A5] transition-all">
+            <span className="font-serif font-black text-2xl text-[#D8C3A5]">{m.num}</span>
+            <span className="flex-1 min-w-0">
+              <span className="block font-bold text-[#004030] dark:text-[#D8C3A5]">{m.title}</span>
+              <span className="block text-sm text-slate-500 dark:text-slate-400 mt-1">{m.desc}</span>
+            </span>
+            <IconChevronRight size={18} className="mt-1 text-slate-400 shrink-0" />
+          </button>
+        ))}
+      </div>
+      <button onClick={() => go(1)} className="px-8 py-3 bg-[#004030] dark:bg-[#D8C3A5] text-white dark:text-[#004030] font-bold rounded-xl shadow hover:shadow-lg transition-all">{t.m0_start}</button>
+    </div>
+  );
+
+  const renderLearn = () => {
+    const mk = `m${module}`;
+    const Fig = FIGS[module];
+    return (
+      <div className="space-y-6 text-lg leading-relaxed text-slate-700 dark:text-slate-300 animate-fade-in">
+        <H2 icon={MOD_ICONS[module]} number={module}>{t[`${mk}_title`]}</H2>
+        <div className="bg-[#004030]/5 dark:bg-[#D8C3A5]/5 rounded-xl p-5 border-l-4 border-[#D8C3A5]">
+          <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 mb-2">{t.overview_label}</h3>
+          <p>{t[`${mk}_overview`]}</p>
+        </div>
+        <div>
+          <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 mb-3">{t.highlights_label}</h3>
+          <div className="flex flex-wrap gap-2">
+            {t[`${mk}_highlights`].map((h, i) => (
+              <span key={i} className="px-3 py-1 bg-[#004030]/10 dark:bg-[#D8C3A5]/10 text-[#004030] dark:text-[#D8C3A5] rounded-full text-sm font-medium">{h}</span>
+            ))}
+          </div>
+        </div>
+        <div className="space-y-4">
+          <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500">{t.deep_dive_label}</h3>
+          <p>{t[`${mk}_p1`]}</p>
+          <p className="p-4 bg-slate-100 dark:bg-slate-800 rounded-lg italic font-serif">{t[`${mk}_p2`]}</p>
+          <p>{t[`${mk}_p3`]}</p>
+          {t[`${mk}_p4`] && <p>{t[`${mk}_p4`]}</p>}
+          {t[`${mk}_p5`] && <p>{t[`${mk}_p5`]}</p>}
+        </div>
+        <div>
+          <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 mb-3">{t.figure_label}</h3>
+          <div className="flex justify-center">{Fig && <Fig lang={lang} />}</div>
+        </div>
+        <FlipCardDeck key={`cards-${module}`} terms={t[`${mk}_terms`]} t={t} moduleId={module} onCardRead={handleCardRead} />
+        <div className="bg-slate-100 dark:bg-slate-800 rounded-xl p-5">
+          <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 mb-2">{t.wrapup_label}</h3>
+          <p className="italic">{t[`${mk}_wrapup`]}</p>
+        </div>
+        <ModuleQuiz key={`quiz-${module}`} questions={t[`${mk}_q`]} t={t} moduleId={module} onQuizSubmit={handleQuizSubmit} moduleName={t[`${mk}_title`]} />
+      </div>
+    );
+  };
+
+  const renderLab = () => (
+    <div className="space-y-6 animate-fade-in">
+      <H2 icon={MOD_ICONS[IDX_LAB]} number={IDX_LAB}>{t.mlab_title}</H2>
+      <p className="text-lg text-slate-600 dark:text-slate-300">{t.mlab_desc}</p>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <LabPlacement lang={lang} info={t.mlab_labs[0]} />
+        <LabCycle lang={lang} info={t.mlab_labs[3]} />
+        <ScenarioLab key={`l2-${lang}`} lang={lang} info={t.mlab_labs[1]} kind="lang" />
+        <ScenarioLab key={`l3-${lang}`} lang={lang} info={t.mlab_labs[2]} kind="level" />
+      </div>
+    </div>
+  );
+
+  const renderRes = () => (
+    <div className="space-y-6 animate-fade-in">
+      <H2 icon={MOD_ICONS[IDX_RES]} number={IDX_RES}>{t.mres_title}</H2>
+      <p className="text-lg text-slate-600 dark:text-slate-300">{t.mres_desc}</p>
+      {t.mres_groups.map((g, i) => (
+        <div key={i}>
+          <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 mb-3">{g.title}</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">{g.links.map((l, j) => <LinkCard key={j} {...l} />)}</div>
+        </div>
+      ))}
+    </div>
+  );
+
+  const totalCards = [...Array(NUM_LEARN).keys()].reduce((s, i) => s + t[`m${i + 1}_terms`].length, 0);
+  const sumRead = analytics.cardsRead.reduce((a, b) => a + b, 0);
+  const sumQC = analytics.quizCorrect.reduce((a, b) => a + b, 0);
+  const sumQT = analytics.quizTotal.reduce((a, b) => a + b, 0);
+  const formOK = studentInfo.group && studentInfo.dept && studentInfo.id && studentInfo.nameEn && studentInfo.nameZh;
+
+  const exportCSV = () => {
+    if (!formOK) return;
+    const esc = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+    const rows = [
+      ['Group', studentInfo.group], ['Dept', studentInfo.dept], ['Student ID', studentInfo.id],
+      ['English Name', studentInfo.nameEn], ['Chinese Name', studentInfo.nameZh], ['Exported', new Date().toLocaleString()], [],
+      ['Module', 'Time (s)', 'Clicks', 'Cards Read', 'Cards Total', 'Quiz Correct', 'Quiz Total', 'Accuracy (%)', 'Wrong Questions']
+    ];
+    for (let i = 0; i < TOTAL; i++) {
+      const isL = i >= 1 && i <= NUM_LEARN;
+      const ct = isL ? t[`m${i}_terms`].length : '';
+      const acc = analytics.quizTotal[i] > 0 ? Math.round(analytics.quizCorrect[i] / analytics.quizTotal[i] * 100) : '';
+      rows.push([modulesList[i].nav, analytics.time[i], analytics.clicks[i], isL ? analytics.cardsRead[i] : '', ct,
+        isL ? analytics.quizCorrect[i] : '', isL ? analytics.quizTotal[i] : '', acc, (analytics.wrongTopics[i] || []).join(' | ')]);
+    }
+    rows.push(['TOTAL', analytics.time.reduce((a, b) => a + b, 0), analytics.clicks.reduce((a, b) => a + b, 0), sumRead, totalCards, sumQC, sumQT, sumQT ? Math.round(sumQC / sumQT * 100) : '', '']);
+    const csv = '﻿' + rows.map(r => r.map(esc).join(',')).join('\r\n');
+    const d = new Date();
+    const ymd = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
+    const fname = `${dict.zh.brand} ${dict.zh.title}_${studentInfo.nameEn} ${studentInfo.nameZh}_${ymd}.csv`;
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    const a = document.createElement('a'); a.href = url; a.download = fname; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+
+  const clearAll = () => {
+    if (!window.confirm(t.analytics_wp_clear_confirm)) return;
+    try { localStorage.removeItem(LS_KEY); localStorage.removeItem(LS_STU); } catch {}
+    setAnalytics(emptyAnalytics());
+    setStudentInfo({ group: '', dept: '', id: '', nameEn: '', nameZh: '' });
+  };
+
+  const renderAnalytics = () => {
+    const weak = [];
+    for (let i = 1; i <= NUM_LEARN; i++) {
+      if (analytics.quizTotal[i] > 0) {
+        const acc = Math.round(analytics.quizCorrect[i] / analytics.quizTotal[i] * 100);
+        if (acc < 75) weak.push({ i, acc });
+      }
+    }
+    weak.sort((a, b) => a.acc - b.acc);
+    const visitedN = [...Array(NUM_LEARN).keys()].filter(i => analytics.time[i + 1] > 0 || analytics.clicks[i + 1] > 0).length;
+    const inp = 'w-full mt-1 px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-sm';
+    const stat = [
+      [t.analytics_total_time, `${analytics.time.reduce((a, b) => a + b, 0)} ${t.analytics_sec}`],
+      [t.analytics_total_clicks, `${analytics.clicks.reduce((a, b) => a + b, 0)}`],
+      [t.analytics_overall_acc, sumQT ? `${Math.round(sumQC / sumQT * 100)}%` : '—'],
+      [t.analytics_card_usage, `${totalCards ? Math.round(sumRead / totalCards * 100) : 0}%`]
+    ];
+    return (
+      <div className="space-y-8 animate-fade-in">
+        <H2 icon={MOD_ICONS[IDX_ANA]} number={IDX_ANA}>{t.analytics_title}</H2>
+        <p className="text-slate-600 dark:text-slate-300">{t.analytics_desc}</p>
+        <p className="text-xs text-green-600 dark:text-green-400">{t.analytics_wp_saved}</p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {stat.map((s, i) => (
+            <div key={i} className="bg-white dark:bg-slate-800 rounded-xl p-5 border border-slate-200 dark:border-slate-700">
+              <p className="text-xs text-slate-500 dark:text-slate-400">{s[0]}</p>
+              <p className="font-serif font-black text-2xl text-[#004030] dark:text-[#D8C3A5] mt-2">{s[1]}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="bg-white dark:bg-slate-800 rounded-xl p-5 border border-slate-200 dark:border-slate-700">
+          <h3 className="font-serif font-bold text-[#004030] dark:text-[#D8C3A5] mb-3">{t.analytics_progress_title}</h3>
+          <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden mb-4">
+            <div className="h-full bg-[#004030] dark:bg-[#D8C3A5] transition-all" style={{ width: `${visitedN / NUM_LEARN * 100}%` }} />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {[...Array(NUM_LEARN).keys()].map(k => {
+              const i = k + 1, vis = analytics.time[i] > 0 || analytics.clicks[i] > 0, qd = analytics.quizTotal[i] > 0;
+              return (
+                <button key={i} onClick={() => go(i)} className="flex items-center justify-between gap-2 text-left text-sm px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 hover:border-[#004030] dark:hover:border-[#D8C3A5]">
+                  <span className="truncate">{modulesList[i].nav}</span>
+                  <span className="flex gap-1 shrink-0 text-[11px]">
+                    <span className={`px-2 py-0.5 rounded-full ${vis ? 'bg-[#004030]/10 text-[#004030] dark:bg-[#D8C3A5]/10 dark:text-[#D8C3A5]' : 'bg-slate-100 dark:bg-slate-700 text-slate-400'}`}>{vis ? t.analytics_progress_visited : t.analytics_progress_not_visited}</span>
+                    {qd && <span className="px-2 py-0.5 rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">{t.analytics_progress_quiz_done}</span>}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-slate-800 rounded-xl p-5 border border-slate-200 dark:border-slate-700">
+          <h3 className="font-serif font-bold text-[#004030] dark:text-[#D8C3A5] mb-3 flex items-center gap-2"><IconAlertTriangle size={18} />{t.analytics_wp_title}</h3>
+          {weak.length === 0
+            ? <p className="text-sm text-slate-500 flex items-center gap-2">{sumQT > 0 ? <><IconCheckCircle size={16} className="text-green-500" />{t.analytics_wp_allpass}</> : t.analytics_no_data}</p>
+            : weak.map(w => (
+              <div key={w.i} className="mb-4 p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                <p className="font-bold text-sm">{modulesList[w.i].title} — {w.acc}%</p>
+                <p className="text-xs text-slate-500 mt-2">{t.analytics_wp_incorrect}</p>
+                <ul className="list-disc pl-5 text-xs text-slate-600 dark:text-slate-300 mt-1">{(analytics.wrongTopics[w.i] || []).map((q, j) => <li key={j}>{q}</li>)}</ul>
+                <button onClick={() => go(w.i)} className="text-xs font-bold text-[#004030] dark:text-[#D8C3A5] mt-2 hover:underline">{t.analytics_wp_goto}</button>
+              </div>
+            ))}
+        </div>
+
+        <div className="bg-white dark:bg-slate-800 rounded-xl p-5 border border-slate-200 dark:border-slate-700 overflow-x-auto">
+          <table className="w-full text-sm min-w-[560px]">
+            <thead><tr className="text-left text-xs text-slate-500 border-b border-slate-200 dark:border-slate-700">
+              <th className="py-2 pr-2">{t.analytics_module}</th><th className="py-2 pr-2">{t.analytics_time}</th><th className="py-2 pr-2">{t.analytics_clicks}</th>
+              <th className="py-2 pr-2">{t.analytics_cards_read_total}</th><th className="py-2">{t.analytics_correct_ans_total}</th></tr></thead>
+            <tbody>
+              {modulesList.map(m => {
+                const isL = m.id >= 1 && m.id <= NUM_LEARN;
+                return (
+                  <tr key={m.id} className="border-b border-slate-100 dark:border-slate-700/50">
+                    <td className="py-2 pr-2">{m.nav}</td>
+                    <td className="py-2 pr-2">{analytics.time[m.id]} {t.analytics_sec}</td>
+                    <td className="py-2 pr-2">{analytics.clicks[m.id]}</td>
+                    <td className="py-2 pr-2">{isL ? `${analytics.cardsRead[m.id]} / ${t[`m${m.id}_terms`].length}` : '—'}</td>
+                    <td className="py-2">{isL ? (analytics.quizTotal[m.id] > 0 ? `${analytics.quizCorrect[m.id]} / ${analytics.quizTotal[m.id]} / ${t[`m${m.id}_q`].length}` : t.analytics_no_data) : '—'}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="bg-white dark:bg-slate-800 rounded-xl p-5 border border-slate-200 dark:border-slate-700">
+          <h3 className="font-serif font-bold text-[#004030] dark:text-[#D8C3A5] mb-4">{t.analytics_form_title}</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <label className="text-sm">{t.analytics_group}
+              <select className={inp} value={studentInfo.group} onChange={e => setStudentInfo(s => ({ ...s, group: e.target.value }))}>
+                <option value="">{t.analytics_group_select}</option>
+                {t.group_options.map(g => <option key={g} value={g}>{g}</option>)}
+              </select>
+            </label>
+            <label className="text-sm">{t.analytics_dept}
+              <input className={inp} maxLength={20} placeholder={t.analytics_dept_ph} value={studentInfo.dept} onChange={e => setStudentInfo(s => ({ ...s, dept: sanitizeName(e.target.value).slice(0, 20) }))} />
+            </label>
+            <label className="text-sm">{t.analytics_id}
+              <input className={inp} inputMode="numeric" placeholder={t.analytics_id_ph} value={studentInfo.id} onChange={e => setStudentInfo(s => ({ ...s, id: sanitizeStudentId(e.target.value) }))} />
+            </label>
+            <label className="text-sm">{t.analytics_name_en}
+              <input className={inp} placeholder={t.analytics_name_en_ph} value={studentInfo.nameEn} onChange={e => setStudentInfo(s => ({ ...s, nameEn: sanitizeName(e.target.value) }))} />
+            </label>
+            <label className="text-sm">{t.analytics_name_zh}
+              <input className={inp} placeholder={t.analytics_name_zh_ph} value={studentInfo.nameZh} onChange={e => setStudentInfo(s => ({ ...s, nameZh: sanitizeName(e.target.value) }))} />
+            </label>
+          </div>
+          <div className="flex flex-wrap items-center gap-3 mt-5">
+            <button onClick={exportCSV} disabled={!formOK} className="px-5 py-2 bg-[#004030] dark:bg-[#D8C3A5] text-white dark:text-[#004030] font-bold rounded-lg disabled:opacity-40">{t.analytics_export_csv}</button>
+            <button onClick={clearAll} className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg">{t.analytics_wp_clear}</button>
+            {!formOK && <span className="text-xs text-slate-400">{t.analytics_fill_required}</span>}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderPage = () => module === 0 ? renderHome() : module <= NUM_LEARN ? renderLearn() : module === IDX_LAB ? renderLab() : module === IDX_RES ? renderRes() : renderAnalytics();
+  const hb = 'p-2 hover:bg-white/10 rounded-lg';
+
+  return (
+    <div className="min-h-screen flex flex-col pt-16 overflow-x-hidden">
+      <SvgDefs />
+      <header className="fixed top-0 left-0 right-0 h-16 bg-[#004030] dark:bg-slate-900 text-white z-50 shadow-lg border-b border-[#D8C3A5]/30">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 h-16 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1 sm:gap-2 min-w-0">
+            <div className="relative" ref={menuRef}>
+              <button onClick={() => setMenuOpen(!menuOpen)} className={hb} aria-label={t.nav_modules}>{menuOpen ? <IconX /> : <IconMenu />}</button>
+              {menuOpen && (
+                <div className="absolute top-full left-0 mt-1 w-64 max-w-[calc(100vw-2rem)] max-h-[calc(100vh-5rem)] overflow-y-auto bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 z-[100] py-2">
+                  <p className="px-4 py-2 text-xs font-bold uppercase tracking-wider text-slate-400">{t.nav_modules}</p>
+                  {modulesList.map(m => (
+                    <button key={m.id} onClick={() => go(m.id)}
+                      className={`w-full flex items-center gap-3 px-4 py-3 text-sm text-left ${module === m.id ? 'bg-[#004030]/10 dark:bg-[#D8C3A5]/10 text-[#004030] dark:text-[#D8C3A5] font-bold' : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700'}`}>
+                      <span aria-hidden="true">{m.icon}</span><span className="truncate">{m.nav}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <button onClick={() => go(0)} className={hb} aria-label={t.nav_home}><IconHome size={18} /></button>
+            <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex items-center gap-2 min-w-0">
+              <span className="font-serif font-black text-[#D8C3A5] text-lg tracking-widest">{t.brand}</span>
+              <span className="hidden sm:inline font-serif font-bold text-sm md:text-base truncate">{t.title}</span>
+            </button>
+          </div>
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+            <button onClick={() => handleTTS(ttsState === 'playing' ? 'pause' : 'play')} className={`${hb} flex items-center gap-1`} aria-label={t.audio_read} title={t.audio_read}>
+              {ttsState === 'playing' ? <IconPause size={18} /> : <IconPlay size={18} />}
+              <span className="hidden lg:inline text-xs">{t.audio_read}</span>
+            </button>
+            {ttsState !== 'idle' && <button onClick={() => handleTTS('stop')} className={hb} aria-label="Stop"><IconSquare size={16} /></button>}
+            <button onClick={() => setLang(lang === 'en' ? 'zh' : 'en')} className="px-2 sm:px-3 py-1 text-xs font-bold border border-[#D8C3A5]/60 text-[#D8C3A5] rounded-lg hover:bg-white/10">{lang === 'en' ? '中' : 'EN'}</button>
+            <button onClick={() => setIsDark(!isDark)} className={hb} aria-label="theme">{isDark ? <IconSun size={18} /> : <IconMoon size={18} />}</button>
+          </div>
+        </div>
+      </header>
+
+      <div className="flex flex-1 max-w-7xl w-full mx-auto">
+        <aside className="hidden md:block w-64 shrink-0 border-r border-slate-200 dark:border-slate-800 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto py-6 px-3">
+          <p className="px-3 mb-3 text-xs font-bold uppercase tracking-wider text-slate-400">{t.nav_modules}</p>
+          {modulesList.map(m => (
+            <button key={m.id} onClick={() => go(m.id)}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-left mb-1 transition-all ${module === m.id ? 'bg-[#004030] text-white dark:bg-[#D8C3A5] dark:text-[#004030] font-bold' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-800'}`}>
+              <span className="w-5 flex justify-center shrink-0">{sideIcon(m.id)}</span><span className="truncate">{m.nav}</span>
+            </button>
+          ))}
+        </aside>
+        <main className="flex-1 min-w-0 px-4 sm:px-6 md:px-10 py-8 md:py-10"
+          onClick={() => setAnalytics(a => { const c = [...a.clicks]; c[module] += 1; return { ...a, clicks: c }; })}>
+          <div className="max-w-4xl mx-auto" key={module}>
+            {renderPage()}
+            <div className="mt-12 flex justify-between items-center pt-8 border-t border-slate-300 dark:border-slate-700">
+              <button onClick={() => go(Math.max(0, module - 1))} disabled={module === 0}
+                className="px-5 py-2 border border-[#004030] dark:border-[#D8C3A5] text-[#004030] dark:text-[#D8C3A5] font-bold rounded-lg disabled:opacity-0">← {t.nav_prev}</button>
+              <button onClick={() => go(Math.min(TOTAL - 1, module + 1))} disabled={module === TOTAL - 1}
+                className="px-5 py-2 bg-[#004030] dark:bg-[#D8C3A5] text-white dark:text-[#004030] font-bold rounded-lg disabled:opacity-0">{t.nav_next} →</button>
+            </div>
+          </div>
+        </main>
+      </div>
+
+      <footer className="h-8 bg-[#004030] flex items-center justify-between px-4 shrink-0 gap-2">
+        <span className="text-[#D8C3A5]/60 text-[10px] sm:text-xs truncate">{t.date} · {t.copyright}</span>
+        <span className="text-[#D8C3A5]/60 text-[10px] sm:text-xs flex items-center gap-3 shrink-0">
+          <span>Architect:&nbsp;<a href={t.architect_url} target="_blank" rel="noopener noreferrer" className="text-[#D8C3A5] hover:text-white underline">Prof. Shihmin Lo</a></span>
+          <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="text-[#D8C3A5] hover:text-white font-bold">Top ↑</button>
+        </span>
+      </footer>
+    </div>
+  );
+}
+
+if (!window.__BLOCKED) ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
